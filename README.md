@@ -3,6 +3,15 @@
 Versión modificada de [Privacy Friendly To-Do List](https://github.com/SecUSo/privacy-friendly-todo-list)
 (commit `4b660cb`, licencia GPL-3.0). Esta modificación mantiene la misma licencia.
 
+## 📲 Descargar el APK
+
+**[Descargar Tareas Obligatorias v2 (APK)](https://github.com/ivancortez0908-eng/TareasObligatorias/raw/main/apk/tareas-obligatorias-release-v3.5.0-obligatorias.2.apk)**
+
+Ábrelo desde el navegador del teléfono y permite "instalar apps desconocidas".
+Si "Mostrar sobre otras apps" aparece bloqueado: *Ajustes → Apps → Tareas Obligatorias → ⋮ → Permitir configuración restringida*.
+
+Firma SHA-256: `f362acb0a6e4dd26249b79efe4d5db4fa9ede9eea56f3b04fe5e68a237a4ffb4`
+
 **Cambios respecto al original**
 
 - **Ventana flotante de tareas vencidas** (`app/src/main/java/org/secuso/privacyfriendlytodolist/overdue/`):
