@@ -43,6 +43,8 @@ import org.secuso.privacyfriendlytodolist.view.MainActivity
 object OverdueNotifier {
     private const val CHANNEL_ID = "overdue_tasks"
     private const val NOTIFICATION_ID = 0x0D0E
+    private const val TEST_NOTIFICATION_ID = 0x0D0F
+    const val CHANNEL = CHANNEL_ID
 
     private var lastContent = ""
 
@@ -69,18 +71,26 @@ object OverdueNotifier {
      * @param alert If true the notification makes sound / vibrates (and pops up) again,
      * even if its content did not change. Otherwise it only alerts when the content changed.
      */
-    fun show(context: Context, overdueTasks: List<TodoTask>, alert: Boolean) {
+    fun show(context: Context, overdueTasks: List<TodoTask>, realert: Boolean) {
         if (!canPost(context)) {
+            OverdueDiagnostics.recordNotification(context, "blocked: notification permission missing")
             return
         }
         val count = overdueTasks.size
         val text = overdueTasks.joinToString(separator = "\n") { "• " + it.getName() }
         val content = "$count|$text"
         val changed = content != lastContent
+        val ids = overdueTasks.map { it.getId() }.toSet()
+        // A task that just became overdue always alerts with the full screen alert.
+        // The already alerted tasks are stored, so a restart of the app does not alert again.
+        val alerted = OverdueDiagnostics.getAlertedTaskIds(context)
+        val newOverdue = !alerted.containsAll(ids)
         lastContent = content
-        if (!changed && !alert) {
+        OverdueDiagnostics.setAlertedTaskIds(context, ids)
+        if (!changed && !realert) {
             return
         }
+        val alert = realert || newOverdue
         createChannel(context)
         // Tapping the notification shows the overdue tasks screen.
         val alertIntent = Intent(context, OverdueActivity::class.java)
@@ -111,15 +121,52 @@ object OverdueNotifier {
             // locked the tasks screen opens directly, otherwise Android shows a pop-up notification.
             builder.setFullScreenIntent(pendingIntent, true)
         }
+        if (!alert) {
+            // Only update the content (e.g. after an app restart), without sound or pop-up.
+            builder.setSilent(true)
+        }
         try {
             NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, builder.build())
-        } catch (_: SecurityException) {
-            // Permission was revoked meanwhile.
+            OverdueDiagnostics.recordNotification(context,
+                "$count overdue, alert=$alert, fullscreen=${alert && !OverlayPermission.isOverlayActive(context)}")
+        } catch (e: SecurityException) {
+            OverdueDiagnostics.recordNotification(context, "error: ${e.message}")
+        }
+    }
+
+    /** Test alert from the diagnostics screen: same channel and full screen alert as a real one. */
+    fun showTest(context: Context) {
+        if (!canPost(context)) {
+            OverdueDiagnostics.recordNotification(context, "test blocked: notification permission missing")
+            return
+        }
+        createChannel(context)
+        val intent = Intent(context, OverdueActivity::class.java)
+            .putExtra(OverdueActivity.EXTRA_TEST, true)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        val pendingIntent = PendingIntent.getActivity(context, TEST_NOTIFICATION_ID, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_checkbox)
+            .setContentTitle(context.getString(R.string.overdue_test_title))
+            .setContentText(context.getString(R.string.overdue_test_text))
+            .setColor(ContextCompat.getColor(context, R.color.urgencyExceeded))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_REMINDER)
+            .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
+            .setFullScreenIntent(pendingIntent, true)
+        try {
+            NotificationManagerCompat.from(context).notify(TEST_NOTIFICATION_ID, builder.build())
+            OverdueDiagnostics.recordNotification(context, "test notification posted")
+        } catch (e: SecurityException) {
+            OverdueDiagnostics.recordNotification(context, "test error: ${e.message}")
         }
     }
 
     fun cancel(context: Context) {
         lastContent = ""
+        OverdueDiagnostics.setAlertedTaskIds(context, emptySet())
         NotificationManagerCompat.from(context).cancel(NOTIFICATION_ID)
     }
 }

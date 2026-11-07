@@ -40,6 +40,7 @@ object OverdueChecker {
     private val TAG = LogTag.create(this::class.java)
     private const val ALARM_REQUEST_CODE = 0x0D0E
     const val ACTION_CHECK = "org.secuso.privacyfriendlytodolist.OVERDUE_CHECK"
+    const val ACTION_TEST = "org.secuso.privacyfriendlytodolist.OVERDUE_TEST"
 
     /** Lazily created model services that live as long as the process. */
     private var viewModel: CustomViewModel? = null
@@ -132,6 +133,7 @@ object OverdueChecker {
                 val overdue = filterOverdue(appContext, tasks, now)
                 Log.d(TAG, "Overdue check ($reason): ${overdue.size} of ${tasks.size} tasks are overdue.")
                 var nextCheck = computeNextTransition(tasks, now, reminderIsLimit)
+                var nextIsTransition = nextCheck != null
                 if (overdue.isEmpty()) {
                     OverdueOverlay.hide(appContext)
                     OverdueNotifier.cancel(appContext)
@@ -147,9 +149,11 @@ object OverdueChecker {
                     val realertTime = now.addSeconds(PreferenceMgr.getOverdueReshowMinutes(appContext) * 60L)
                     if (nextCheck == null || realertTime < nextCheck) {
                         nextCheck = realertTime
+                        nextIsTransition = false
                     }
                 }
-                scheduleNextCheck(appContext, nextCheck)
+                scheduleNextCheck(appContext, nextCheck, nextIsTransition)
+                OverdueDiagnostics.recordCheck(appContext, reason, tasks.size, overdue.size)
             } catch (e: Exception) {
                 Log.e(TAG, "Overdue check ($reason) failed: $e")
             } finally {
@@ -164,24 +168,68 @@ object OverdueChecker {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
     }
 
-    private fun scheduleNextCheck(context: Context, time: Timestamp?) {
+    fun canScheduleExactAlarms(context: Context): Boolean {
+        val manager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        return Build.VERSION.SDK_INT < Build.VERSION_CODES.S || manager.canScheduleExactAlarms()
+    }
+
+    /**
+     * @param isTransition True if at [time] a task becomes overdue. These alarms are set as
+     * "alarm clock" alarms: the most reliable kind, they also fire in deep sleep (Doze) and on
+     * devices with aggressive battery saving. Re-alerts of already overdue tasks use normal exact alarms.
+     */
+    private fun scheduleNextCheck(context: Context, time: Timestamp?, isTransition: Boolean = false) {
         if (time == null) {
             cancelNextCheck(context)
+            OverdueDiagnostics.recordSchedule(context, null, "-")
             return
         }
         val manager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val pendingIntent = createAlarmIntent(context)
+        var method: String
         try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !manager.canScheduleExactAlarms()) {
+            if (!canScheduleExactAlarms(context)) {
+                method = "inexact"
                 manager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time.timeInMillis, pendingIntent)
+            } else if (isTransition) {
+                method = "alarm clock"
+                val showIntent = PendingIntent.getActivity(context, ALARM_REQUEST_CODE,
+                    Intent(context, org.secuso.privacyfriendlytodolist.view.MainActivity::class.java),
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                manager.setAlarmClock(AlarmManager.AlarmClockInfo(time.timeInMillis, showIntent), pendingIntent)
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                method = "exact"
                 manager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time.timeInMillis, pendingIntent)
             } else {
+                method = "exact"
                 manager.setExact(AlarmManager.RTC_WAKEUP, time.timeInMillis, pendingIntent)
             }
-            Log.d(TAG, "Next overdue check scheduled for $time.")
+            Log.d(TAG, "Next overdue check scheduled for $time ($method).")
         } catch (e: SecurityException) {
+            method = "error: ${e.message}"
             Log.e(TAG, "Unable to schedule next overdue check: $e")
+        }
+        OverdueDiagnostics.recordSchedule(context, time, method)
+    }
+
+    /** Fires a test alert in [delaySeconds] seconds, to check that alerts work on this phone. */
+    fun scheduleTestAlert(context: Context, delaySeconds: Long) {
+        val manager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(context, OverdueCheckReceiver::class.java).setAction(ACTION_TEST)
+        val pendingIntent = PendingIntent.getBroadcast(context, ALARM_REQUEST_CODE + 1, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        val time = System.currentTimeMillis() + delaySeconds * 1000L
+        try {
+            if (canScheduleExactAlarms(context)) {
+                val showIntent = PendingIntent.getActivity(context, ALARM_REQUEST_CODE + 1,
+                    Intent(context, OverdueDiagnosticsActivity::class.java),
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                manager.setAlarmClock(AlarmManager.AlarmClockInfo(time, showIntent), pendingIntent)
+            } else {
+                manager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, pendingIntent)
+            }
+        } catch (e: SecurityException) {
+            Log.e(TAG, "Unable to schedule test alert: $e")
         }
     }
 

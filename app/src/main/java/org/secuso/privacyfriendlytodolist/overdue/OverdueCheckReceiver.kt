@@ -27,9 +27,15 @@ import android.content.Intent
  */
 class OverdueCheckReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action == OverdueChecker.ACTION_TEST) {
+            OverdueDiagnostics.recordAlarmReceived(context, "test")
+            OverdueNotifier.showTest(context)
+            return
+        }
         if (intent.action != OverdueChecker.ACTION_CHECK) {
             return
         }
+        OverdueDiagnostics.recordAlarmReceived(context, "check")
         val pendingResult = goAsync()
         OverdueChecker.check(context, "alarm", realert = true) {
             pendingResult.finish()

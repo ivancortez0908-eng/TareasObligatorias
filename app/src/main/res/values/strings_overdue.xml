@@ -72,4 +72,34 @@
         <item>30</item>
         <item>60</item>
     </string-array>
+    <!-- Alert diagnostics -->
+    <string name="diag_title">Alert diagnostics</string>
+    <string name="diag_settings_summary">Check why an alert does not appear and test it</string>
+    <string name="diag_intro">Everything marked with ❌ can prevent alerts. Tap \"Fix\" next to it.</string>
+    <string name="diag_device">Phone: %1$s · Android %2$s (API %3$d)</string>
+    <string name="diag_android_go">Android Go: floating windows are not possible, a full screen alert is used.</string>
+    <string name="diag_section_permissions">Permissions and settings</string>
+    <string name="diag_notifications">Notifications allowed</string>
+    <string name="diag_channel">\"Overdue tasks\" notifications with sound and pop-up</string>
+    <string name="diag_exact_alarms">Alarms and reminders (exact time)</string>
+    <string name="diag_full_screen">Full screen alerts</string>
+    <string name="diag_battery">Battery optimization disabled for this app</string>
+    <string name="diag_background">Background activity allowed</string>
+    <string name="diag_overlay">Display over other apps</string>
+    <string name="diag_overlay_go">Floating window: not available on Android Go.</string>
+    <string name="diag_fix">Fix</string>
+    <string name="diag_section_activity">Last activity</string>
+    <string name="diag_last_check">Last check: %1$s (%2$s) – %3$d tasks, %4$d overdue</string>
+    <string name="diag_next_alarm">Next alarm: %1$s (%2$s)</string>
+    <string name="diag_last_alarm">Last alarm received: %1$s (%2$s)</string>
+    <string name="diag_last_notification">Last notification: %1$s (%2$s)</string>
+    <string name="diag_section_test">Test</string>
+    <string name="diag_test_explanation">Tap the button, lock the phone and wait 15 seconds. The screen should turn on with a test alert.</string>
+    <string name="diag_test_button">Test alert in 15 seconds</string>
+    <string name="diag_test_scheduled">Test alert in 15 seconds. Lock the phone now.</string>
+    <string name="diag_check_now">Check overdue tasks now</string>
+    <string name="overdue_test_title">✅ Test alert</string>
+    <string name="overdue_test_text">If you see this, alerts work on this phone.</string>
+    <string name="overdue_test_success">If this screen opened by itself, full screen alerts work on this phone.</string>
+    <string name="overdue_test_close">Close</string>
 </resources>

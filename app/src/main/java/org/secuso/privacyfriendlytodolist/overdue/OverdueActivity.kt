@@ -59,8 +59,17 @@ class OverdueActivity : AppCompatActivity(), OverdueTaskViews.Listener {
         findViewById<MaxHeightScrollView>(R.id.overlay_scroll).maxHeightFraction = 0.75f
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+    }
+
     override fun onResume() {
         super.onResume()
+        if (intent?.getBooleanExtra(EXTRA_TEST, false) == true) {
+            bindTest()
+            return
+        }
         OverdueChecker.loadOverdueTasks(this) { overdue ->
             if (isFinishing || isDestroyed) {
                 return@loadOverdueTasks
@@ -72,6 +81,22 @@ class OverdueActivity : AppCompatActivity(), OverdueTaskViews.Listener {
                 bind()
             }
         }
+    }
+
+    /** Test alert from the diagnostics screen: proves that the full screen alert works. */
+    private fun bindTest() {
+        findViewById<TextView>(R.id.overlay_title).setText(R.string.overdue_test_title)
+        findViewById<Button>(R.id.overlay_minimize).apply {
+            setText(R.string.overdue_test_close)
+            setOnClickListener { finish() }
+        }
+        val container = findViewById<LinearLayout>(R.id.overlay_task_container)
+        container.removeAllViews()
+        container.addView(TextView(this).apply {
+            setText(R.string.overdue_test_success)
+            textSize = 16f
+            setPadding(0, 24, 0, 24)
+        })
     }
 
     private fun bind() {
@@ -107,5 +132,9 @@ class OverdueActivity : AppCompatActivity(), OverdueTaskViews.Listener {
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
         startActivity(intent)
         finish()
+    }
+
+    companion object {
+        const val EXTRA_TEST = "EXTRA_OVERDUE_TEST"
     }
 }

@@ -87,6 +87,11 @@ class SettingsActivity : AppCompatActivity() {
             // initializes
             initSummary(preferenceScreen)
 
+            findPreference<Preference>("pref_overdue_diagnostics")?.setOnPreferenceClickListener {
+                startActivity(Intent(requireContext(),
+                    org.secuso.privacyfriendlytodolist.overdue.OverdueDiagnosticsActivity::class.java))
+                true
+            }
             findPreference<Preference>(KEY_OVERDUE_PERMISSION)?.setOnPreferenceClickListener {
                 OverlayPermission.openPermissionSettings(requireActivity())
                 true

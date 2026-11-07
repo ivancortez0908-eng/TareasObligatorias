@@ -15,6 +15,10 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <!-- Full screen alert (like an alarm clock) where the floating window is not possible, e.g. Android Go. -->
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <!-- Reliable alarm-clock style alarms when a task becomes overdue (granted automatically on Android 13+). -->
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <!-- Lets the user exempt the app from battery optimization in the alert diagnostics screen. -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="${applicationId}.TODO_PERMISSION" />
     <uses-permission android:name="org.secuso.privacyfriendlyproductivitytimer.TODO_RE_PERMISSION" />
 
@@ -59,6 +63,9 @@
             android:launchMode="singleTask"
             android:taskAffinity="${applicationId}.overdue"
             android:theme="@style/AppTheme" />
+        <activity
+            android:name=".overdue.OverdueDiagnosticsActivity"
+            android:exported="false" />
         <activity
             android:name=".view.TutorialActivity"
             android:parentActivityName="view.MainActivity"

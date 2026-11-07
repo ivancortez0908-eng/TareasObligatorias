@@ -64,4 +64,34 @@
         <item>30 minutos</item>
         <item>60 minutos</item>
     </string-array>
+    <!-- Diagnóstico de alertas -->
+    <string name="diag_title">Diagnóstico de alertas</string>
+    <string name="diag_settings_summary">Revisa por qué no aparece una alerta y pruébala</string>
+    <string name="diag_intro">Todo lo marcado con ❌ puede impedir las alertas. Toca \"Arreglar\" a su lado.</string>
+    <string name="diag_device">Teléfono: %1$s · Android %2$s (API %3$d)</string>
+    <string name="diag_android_go">Android Go: no permite ventanas flotantes, se usa la alerta de pantalla completa.</string>
+    <string name="diag_section_permissions">Permisos y ajustes</string>
+    <string name="diag_notifications">Notificaciones permitidas</string>
+    <string name="diag_channel">Notificaciones de \"Tareas vencidas\" con sonido y emergentes</string>
+    <string name="diag_exact_alarms">Alarmas y recordatorios (hora exacta)</string>
+    <string name="diag_full_screen">Alertas de pantalla completa</string>
+    <string name="diag_battery">Optimización de batería desactivada para esta app</string>
+    <string name="diag_background">Actividad en segundo plano permitida</string>
+    <string name="diag_overlay">Mostrar sobre otras apps</string>
+    <string name="diag_overlay_go">Ventana flotante: no disponible en Android Go.</string>
+    <string name="diag_fix">Arreglar</string>
+    <string name="diag_section_activity">Última actividad</string>
+    <string name="diag_last_check">Última revisión: %1$s (%2$s) – %3$d tareas, %4$d vencidas</string>
+    <string name="diag_next_alarm">Próxima alarma: %1$s (%2$s)</string>
+    <string name="diag_last_alarm">Última alarma recibida: %1$s (%2$s)</string>
+    <string name="diag_last_notification">Última notificación: %1$s (%2$s)</string>
+    <string name="diag_section_test">Prueba</string>
+    <string name="diag_test_explanation">Toca el botón, bloquea el teléfono y espera 15 segundos. Debería encenderse la pantalla con una alerta de prueba.</string>
+    <string name="diag_test_button">Probar alerta en 15 segundos</string>
+    <string name="diag_test_scheduled">Alerta de prueba en 15 segundos. Bloquea el teléfono ahora.</string>
+    <string name="diag_check_now">Revisar tareas vencidas ahora</string>
+    <string name="overdue_test_title">✅ Alerta de prueba</string>
+    <string name="overdue_test_text">Si ves esto, las alertas funcionan en este teléfono.</string>
+    <string name="overdue_test_success">Si esta pantalla se abrió sola, las alertas de pantalla completa funcionan en este teléfono.</string>
+    <string name="overdue_test_close">Cerrar</string>
 </resources>

@@ -87,6 +87,13 @@
             android:summary="@string/overdue_settings_enabled_summary"
             android:title="@string/overdue_settings_enabled" />
 
+        <Preference
+            android:key="pref_overdue_diagnostics"
+            android:dependency="pref_overdue_enabled"
+            android:persistent="false"
+            android:summary="@string/diag_settings_summary"
+            android:title="@string/diag_title" />
+
         <SwitchPreference
             android:key="pref_overdue_use_overlay"
             android:defaultValue="true"
