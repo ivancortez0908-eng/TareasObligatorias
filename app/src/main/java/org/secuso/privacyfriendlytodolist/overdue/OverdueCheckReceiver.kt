@@ -22,7 +22,8 @@ import android.content.Context
 import android.content.Intent
 
 /**
- * Receives the alarm that fires when the next task becomes overdue.
+ * Receives the alarm that fires when the next task becomes overdue, or when the
+ * insistent reminder of already overdue tasks is due again.
  */
 class OverdueCheckReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -30,7 +31,7 @@ class OverdueCheckReceiver : BroadcastReceiver() {
             return
         }
         val pendingResult = goAsync()
-        OverdueChecker.check(context, "alarm") {
+        OverdueChecker.check(context, "alarm", realert = true) {
             pendingResult.finish()
         }
     }

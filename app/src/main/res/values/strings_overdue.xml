@@ -21,7 +21,7 @@
 
     <!-- Notification -->
     <string name="overdue_channel_name">Overdue tasks</string>
-    <string name="overdue_channel_desc">Permanent alert while there are overdue tasks.</string>
+    <string name="overdue_channel_desc">Insistent alert while there are overdue tasks.</string>
     <plurals name="overdue_notification_title">
         <item quantity="one">%d overdue task</item>
         <item quantity="other">%d overdue tasks</item>
@@ -30,7 +30,8 @@
 
     <!-- Permission dialog -->
     <string name="overdue_permission_dialog_title">Floating window</string>
-    <string name="overdue_permission_dialog_message">To show overdue tasks on top of other apps, allow \"Display over other apps\" for this app in the next screen.</string>
+    <string name="overdue_permission_dialog_message">To show overdue tasks on top of other apps, allow \"Display over other apps\" for this app in the next screen.\n\nIf the option is greyed out (\"Restricted setting\"), open Settings → Apps → this app → menu ⋮ → \"Allow restricted settings\" and try again.\n\nThe app does not run in the background: it only wakes up when a task becomes overdue and every few minutes while one is overdue.</string>
+    <string name="overdue_permission_dialog_notification_only">Notification only</string>
     <string name="overdue_permission_dialog_ok">Allow</string>
     <string name="overdue_permission_dialog_later">Later</string>
 
@@ -48,6 +49,9 @@
     <string name="overdue_settings_fullscreen">Strict mode (full screen)</string>
     <string name="overdue_settings_fullscreen_summary">The window covers the whole screen and blocks the phone until you finish or minimize it</string>
     <string name="overdue_settings_reshow">Minimize for</string>
+    <string name="overdue_settings_reshow_title">Insist every / minimize for</string>
+    <string name="overdue_settings_use_overlay">Use floating window</string>
+    <string name="overdue_settings_use_overlay_summary">If disabled, overdue tasks are only shown as an insistent notification that repeats (lighter, no special permission)</string>
     <string-array name="overdue_reshow_entries">
         <item>2 minutes</item>
         <item>5 minutes</item>

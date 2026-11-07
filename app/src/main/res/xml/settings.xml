@@ -87,9 +87,16 @@
             android:summary="@string/overdue_settings_enabled_summary"
             android:title="@string/overdue_settings_enabled" />
 
+        <SwitchPreference
+            android:key="pref_overdue_use_overlay"
+            android:defaultValue="true"
+            android:dependency="pref_overdue_enabled"
+            android:summary="@string/overdue_settings_use_overlay_summary"
+            android:title="@string/overdue_settings_use_overlay" />
+
         <Preference
             android:key="pref_overdue_permission"
-            android:dependency="pref_overdue_enabled"
+            android:dependency="pref_overdue_use_overlay"
             android:persistent="false"
             android:title="@string/overdue_settings_permission" />
 
@@ -114,12 +121,12 @@
             android:entries="@array/overdue_reshow_entries"
             android:entryValues="@array/overdue_reshow_values"
             android:summary="%s"
-            android:title="@string/overdue_settings_reshow" />
+            android:title="@string/overdue_settings_reshow_title" />
 
         <SwitchPreference
             android:key="pref_overdue_fullscreen"
             android:defaultValue="false"
-            android:dependency="pref_overdue_enabled"
+            android:dependency="pref_overdue_use_overlay"
             android:summary="@string/overdue_settings_fullscreen_summary"
             android:title="@string/overdue_settings_fullscreen" />
     </PreferenceCategory>

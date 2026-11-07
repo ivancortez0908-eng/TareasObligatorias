@@ -99,13 +99,13 @@ object OverdueChecker {
      * Loads all tasks, shows or hides the floating window and schedules the next check.
      * Can be called from any thread that has a looper (results are delivered to the main thread).
      */
-    fun check(context: Context, reason: String, onFinished: (() -> Unit)? = null) {
+    fun check(context: Context, reason: String, realert: Boolean = false, onFinished: (() -> Unit)? = null) {
         val appContext = context.applicationContext
         if (!PreferenceMgr.isOverdueEnabled(appContext)) {
             Log.d(TAG, "Overdue check ($reason): feature disabled.")
             cancelNextCheck(appContext)
             OverdueOverlay.hide(appContext)
-            OverdueService.stop(appContext)
+            OverdueNotifier.cancel(appContext)
             onFinished?.invoke()
             return
         }
@@ -118,17 +118,25 @@ object OverdueChecker {
                     .sortedWith(compareBy<TodoTask> { it.getPriority().ordinal }
                         .thenBy { it.getDeadline()?.timeInSeconds ?: Long.MAX_VALUE })
                 Log.d(TAG, "Overdue check ($reason): ${overdue.size} of ${tasks.size} tasks are overdue.")
-                scheduleNextCheck(appContext, computeNextTransition(tasks, now, reminderIsLimit))
+                var nextCheck = computeNextTransition(tasks, now, reminderIsLimit)
                 if (overdue.isEmpty()) {
                     OverdueOverlay.hide(appContext)
-                    OverdueService.stop(appContext)
+                    OverdueNotifier.cancel(appContext)
                 } else {
-                    // Show the floating window first: On Android 15+ an app may start a
-                    // foreground service from background only while one of its overlay
-                    // windows is visible.
-                    OverdueOverlay.show(appContext, overdue)
-                    OverdueService.startOrUpdate(appContext, overdue)
+                    if (PreferenceMgr.isOverdueOverlayUsed(appContext)) {
+                        OverdueOverlay.show(appContext, overdue)
+                    } else {
+                        OverdueOverlay.hide(appContext)
+                    }
+                    OverdueNotifier.show(appContext, overdue, realert && !OverdueOverlay.isAppInForeground())
+                    // No background service: an alarm wakes the app up again after the
+                    // "minimize" time to re-alert and to bring the floating window back.
+                    val realertTime = now.addSeconds(PreferenceMgr.getOverdueReshowMinutes(appContext) * 60L)
+                    if (nextCheck == null || realertTime < nextCheck) {
+                        nextCheck = realertTime
+                    }
                 }
+                scheduleNextCheck(appContext, nextCheck)
             } catch (e: Exception) {
                 Log.e(TAG, "Overdue check ($reason) failed: $e")
             } finally {

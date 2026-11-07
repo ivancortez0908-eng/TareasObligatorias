@@ -25,6 +25,8 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.util.Log
+import androidx.core.content.edit
+import androidx.preference.PreferenceManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.secuso.privacyfriendlytodolist.R
 import org.secuso.privacyfriendlytodolist.util.LogTag
@@ -64,7 +66,8 @@ object OverlayPermission {
      * @param force If true the dialog is shown even if it was already shown in this session.
      */
     fun checkForPermission(activity: Activity, force: Boolean = false) {
-        if (!PreferenceMgr.isOverdueEnabled(activity) || canDrawOverlays(activity)) {
+        if (!PreferenceMgr.isOverdueEnabled(activity) || !PreferenceMgr.isOverdueOverlayUsed(activity) ||
+            canDrawOverlays(activity)) {
             return
         }
         if (askedThisSession && !force) {
@@ -78,6 +81,12 @@ object OverlayPermission {
                 openPermissionSettings(activity)
             }
             setNegativeButton(R.string.overdue_permission_dialog_later, null)
+            setNeutralButton(R.string.overdue_permission_dialog_notification_only) { _, _ ->
+                PreferenceManager.getDefaultSharedPreferences(activity).edit {
+                    putBoolean(PreferenceMgr.P_OVERDUE_USE_OVERLAY.name, false)
+                }
+                OverdueChecker.check(activity, "overlay disabled by user")
+            }
             show()
         }
     }

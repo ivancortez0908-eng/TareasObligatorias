@@ -73,6 +73,7 @@ object PreferenceMgr {
 
     // Overdue tasks / floating window (Tareas Obligatorias).
     val P_OVERDUE_ENABLED = PrefMetaData("pref_overdue_enabled", PrefDataType.BOOLEAN)
+    val P_OVERDUE_USE_OVERLAY = PrefMetaData("pref_overdue_use_overlay", PrefDataType.BOOLEAN)
     val P_OVERDUE_REMINDER_IS_LIMIT = PrefMetaData("pref_overdue_reminder_is_limit", PrefDataType.BOOLEAN)
     val P_OVERDUE_FULLSCREEN = PrefMetaData("pref_overdue_fullscreen", PrefDataType.BOOLEAN)
     val P_OVERDUE_REQUIRE_KEY_POINTS = PrefMetaData("pref_overdue_require_key_points", PrefDataType.BOOLEAN)
@@ -80,6 +81,10 @@ object PreferenceMgr {
 
     fun isOverdueEnabled(context: Context): Boolean =
         PreferenceManager.getDefaultSharedPreferences(context).getBoolean(P_OVERDUE_ENABLED.name, true)
+
+    /** If false, overdue tasks are only shown as insistent notification (lighter, no floating window). */
+    fun isOverdueOverlayUsed(context: Context): Boolean =
+        PreferenceManager.getDefaultSharedPreferences(context).getBoolean(P_OVERDUE_USE_OVERLAY.name, true)
 
     fun isOverdueReminderTheLimit(context: Context): Boolean =
         PreferenceManager.getDefaultSharedPreferences(context).getBoolean(P_OVERDUE_REMINDER_IS_LIMIT.name, true)

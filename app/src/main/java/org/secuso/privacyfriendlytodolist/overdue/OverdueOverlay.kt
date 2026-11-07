@@ -136,6 +136,8 @@ object OverdueOverlay {
         }
     }
 
+    fun isAppInForeground(): Boolean = appInForeground
+
     private fun isMinimized(): Boolean {
         return appInForeground || System.currentTimeMillis() < minimizedUntilMs
     }

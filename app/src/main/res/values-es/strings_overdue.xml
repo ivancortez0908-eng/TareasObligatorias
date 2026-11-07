@@ -21,7 +21,7 @@
 
     <!-- Notificación -->
     <string name="overdue_channel_name">Tareas vencidas</string>
-    <string name="overdue_channel_desc">Alerta permanente mientras haya tareas vencidas.</string>
+    <string name="overdue_channel_desc">Alerta insistente mientras haya tareas vencidas.</string>
     <plurals name="overdue_notification_title">
         <item quantity="one">%d tarea vencida</item>
         <item quantity="other">%d tareas vencidas</item>
@@ -30,7 +30,8 @@
 
     <!-- Diálogo de permiso -->
     <string name="overdue_permission_dialog_title">Ventana flotante</string>
-    <string name="overdue_permission_dialog_message">Para mostrar las tareas vencidas encima de otras apps, activa \"Mostrar sobre otras apps\" para esta app en la siguiente pantalla.</string>
+    <string name="overdue_permission_dialog_message">Para mostrar las tareas vencidas encima de otras apps, activa \"Mostrar sobre otras apps\" para esta app en la siguiente pantalla.\n\nSi la opción aparece bloqueada (\"Configuración restringida\"), ve a Ajustes → Apps → esta app → menú ⋮ → \"Permitir configuración restringida\" y vuelve a intentarlo.\n\nLa app no se queda funcionando en segundo plano: solo despierta cuando una tarea vence y cada pocos minutos mientras siga vencida.</string>
+    <string name="overdue_permission_dialog_notification_only">Solo notificación</string>
     <string name="overdue_permission_dialog_ok">Permitir</string>
     <string name="overdue_permission_dialog_later">Más tarde</string>
 
@@ -48,6 +49,9 @@
     <string name="overdue_settings_fullscreen">Modo estricto (pantalla completa)</string>
     <string name="overdue_settings_fullscreen_summary">La ventana cubre toda la pantalla y bloquea el teléfono hasta que termines o la minimices</string>
     <string name="overdue_settings_reshow">Minimizar durante</string>
+    <string name="overdue_settings_reshow_title">Insistir cada / minimizar durante</string>
+    <string name="overdue_settings_use_overlay">Usar ventana flotante</string>
+    <string name="overdue_settings_use_overlay_summary">Si la desactivas, las tareas vencidas solo se muestran como una notificación insistente que se repite (más liviano, sin permiso especial)</string>
     <string-array name="overdue_reshow_entries">
         <item>2 minutos</item>
         <item>5 minutos</item>

@@ -13,10 +13,11 @@ Versión modificada de [Privacy Friendly To-Do List](https://github.com/SecUSo/p
   - Se puede **minimizar** a una burbuja durante un tiempo limitado (2–60 min); después vuelve sola.
   - Mientras usas esta app, la ventana se minimiza para dejarte trabajar; al salir vuelve a aparecer.
   - **Modo estricto** opcional: la ventana cubre toda la pantalla.
-  - Un servicio con notificación fija la mantiene activa y revisa cada minuto.
+  - **Sin servicio en segundo plano:** una alarma despierta la app solo cuando una tarea vence
+    y, mientras siga vencida, cada pocos minutos (el tiempo de "minimizar") para insistir.
+  - Se puede **desactivar la ventana flotante** y usar solo una notificación insistente.
 - Ajustes nuevos en *Ajustes → Tareas vencidas (ventana flotante)*.
-- Permisos nuevos: `SYSTEM_ALERT_WINDOW` (mostrar sobre otras apps), `FOREGROUND_SERVICE`,
-  `FOREGROUND_SERVICE_SPECIAL_USE`. **Sigue sin permiso de Internet.**
+- Permiso nuevo: `SYSTEM_ALERT_WINDOW` (mostrar sobre otras apps, opcional). **Sigue sin permiso de Internet.**
 - Identificador de la app cambiado a `org.tareasobligatorias.app` para poder instalarla junto a la original.
 
 ---
