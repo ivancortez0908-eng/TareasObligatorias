@@ -5,10 +5,12 @@ Versión modificada de [Privacy Friendly To-Do List](https://github.com/SecUSo/p
 
 ## 📲 Descargar el APK
 
-**[Descargar Tareas Obligatorias v2 (APK)](https://github.com/ivancortez0908-eng/TareasObligatorias/raw/main/apk/tareas-obligatorias-release-v3.5.0-obligatorias.2.apk)**
+**[Descargar Tareas Obligatorias v3 (APK)](https://github.com/ivancortez0908-eng/TareasObligatorias/raw/main/apk/tareas-obligatorias-release-v3.5.0-obligatorias.3.apk)**
 
 Ábrelo desde el navegador del teléfono y permite "instalar apps desconocidas".
 Si "Mostrar sobre otras apps" aparece bloqueado: *Ajustes → Apps → Tareas Obligatorias → ⋮ → Permitir configuración restringida*.
+En teléfonos **Android Go** ("Función no disponible… ralentiza el teléfono") la ventana flotante no existe:
+la app lo detecta y usa una **alerta de pantalla completa**, como un despertador.
 
 Firma SHA-256: `f362acb0a6e4dd26249b79efe4d5db4fa9ede9eea56f3b04fe5e68a237a4ffb4`
 
@@ -25,8 +27,10 @@ Firma SHA-256: `f362acb0a6e4dd26249b79efe4d5db4fa9ede9eea56f3b04fe5e68a237a4ffb4
   - **Sin servicio en segundo plano:** una alarma despierta la app solo cuando una tarea vence
     y, mientras siga vencida, cada pocos minutos (el tiempo de "minimizar") para insistir.
   - Se puede **desactivar la ventana flotante** y usar solo una notificación insistente.
+  - **Alerta de pantalla completa** (como un despertador, también en la pantalla de bloqueo) cuando no hay
+    ventana flotante, por ejemplo en **Android Go**, que no permite ventanas flotantes a ninguna app.
 - Ajustes nuevos en *Ajustes → Tareas vencidas (ventana flotante)*.
-- Permiso nuevo: `SYSTEM_ALERT_WINDOW` (mostrar sobre otras apps, opcional). **Sigue sin permiso de Internet.**
+- Permisos nuevos: `SYSTEM_ALERT_WINDOW` (mostrar sobre otras apps, opcional) y `USE_FULL_SCREEN_INTENT` (alerta de pantalla completa). **Sigue sin permiso de Internet.**
 - Identificador de la app cambiado a `org.tareasobligatorias.app` para poder instalarla junto a la original.
 
 ---
