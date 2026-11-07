@@ -5,12 +5,15 @@ Versión modificada de [Privacy Friendly To-Do List](https://github.com/SecUSo/p
 
 ## 📲 Descargar el APK
 
-**[Descargar Tareas Obligatorias v3 (APK)](https://github.com/ivancortez0908-eng/TareasObligatorias/raw/main/apk/tareas-obligatorias-release-v3.5.0-obligatorias.3.apk)**
+**[Descargar Tareas Obligatorias v4 (APK)](https://github.com/ivancortez0908-eng/TareasObligatorias/raw/main/apk/tareas-obligatorias-release-v3.5.0-obligatorias.4.apk)**
 
 Ábrelo desde el navegador del teléfono y permite "instalar apps desconocidas".
 Si "Mostrar sobre otras apps" aparece bloqueado: *Ajustes → Apps → Tareas Obligatorias → ⋮ → Permitir configuración restringida*.
 En teléfonos **Android Go** ("Función no disponible… ralentiza el teléfono") la ventana flotante no existe:
 la app lo detecta y usa una **alerta de pantalla completa**, como un despertador.
+
+**¿No aparece la alerta?** Abre *Ajustes → Tareas vencidas → Diagnóstico de alertas*: muestra qué permiso
+falta (con botón para arreglarlo) y tiene un botón **"Probar alerta en 15 segundos"**.
 
 Firma SHA-256: `f362acb0a6e4dd26249b79efe4d5db4fa9ede9eea56f3b04fe5e68a237a4ffb4`
 
