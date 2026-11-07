@@ -21,6 +21,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import org.secuso.privacyfriendlytodolist.overdue.OverdueChecker
 import org.secuso.privacyfriendlytodolist.service.JobManager
 import org.secuso.privacyfriendlytodolist.util.LogTag
 
@@ -34,6 +35,8 @@ class AutoStartReceiver : BroadcastReceiver() {
 
         Log.i(TAG, "Received intent with action $action. Starting update-alarm-job.")
         JobManager.startUpdateAlarmJob(context)
+        val pendingResult = goAsync()
+        OverdueChecker.check(context, "boot") { pendingResult.finish() }
     }
 
     companion object {

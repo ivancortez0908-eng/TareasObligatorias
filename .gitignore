@@ -40,3 +40,8 @@ Thumbs.db
 *.apk
 
 /pfa.properties
+
+# Llave de firma: NO subir a ningun repositorio
+/keystore/
+/pfa.properties
+local.properties

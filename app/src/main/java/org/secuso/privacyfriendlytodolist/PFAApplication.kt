@@ -17,7 +17,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 package org.secuso.privacyfriendlytodolist
 
+import android.app.Activity
 import android.app.Application
+import android.os.Bundle
 import android.content.SharedPreferences
 import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
@@ -29,6 +31,8 @@ import org.secuso.privacyfriendlytodolist.model.Model
 import org.secuso.privacyfriendlytodolist.observer.PreferenceObserver
 import org.secuso.privacyfriendlytodolist.observer.PreferenceObserver.OnPreferenceChangeListener
 import org.secuso.privacyfriendlytodolist.observer.TaskChangeObserver
+import org.secuso.privacyfriendlytodolist.overdue.OverdueChecker
+import org.secuso.privacyfriendlytodolist.overdue.OverdueOverlay
 import org.secuso.privacyfriendlytodolist.service.JobManager
 import org.secuso.privacyfriendlytodolist.service.PeriodicUpdater
 import org.secuso.privacyfriendlytodolist.util.LogTag
@@ -53,6 +57,39 @@ class PFAApplication : Application(), Configuration.Provider, OnPreferenceChange
         PreferenceObserver.initialize(this)
         PreferenceObserver.registerPreferenceChangeListener(this)
         applyAppTheme()
+        registerActivityLifecycleCallbacks(ForegroundTracker())
+        OverdueChecker.check(this, "app start")
+    }
+
+    /**
+     * Minimizes the overdue floating window while an activity of this app is visible,
+     * so the user can work on the task, and expands it again when the app is left.
+     */
+    private inner class ForegroundTracker : ActivityLifecycleCallbacks {
+        private var startedActivities = 0
+
+        override fun onActivityStarted(activity: Activity) {
+            ++startedActivities
+            if (startedActivities == 1) {
+                OverdueOverlay.setAppInForeground(this@PFAApplication, true)
+            }
+        }
+
+        override fun onActivityStopped(activity: Activity) {
+            if (startedActivities > 0) {
+                --startedActivities
+            }
+            if (startedActivities == 0) {
+                OverdueOverlay.setAppInForeground(this@PFAApplication, false)
+                OverdueChecker.check(this@PFAApplication, "app left")
+            }
+        }
+
+        override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
+        override fun onActivityResumed(activity: Activity) {}
+        override fun onActivityPaused(activity: Activity) {}
+        override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
+        override fun onActivityDestroyed(activity: Activity) {}
     }
 
     override fun onPreferenceChange(sharedPreferences: SharedPreferences, key: String?) {

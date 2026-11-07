@@ -20,6 +20,7 @@ package org.secuso.privacyfriendlytodolist.observer
 import android.content.Context
 import android.util.Log
 import org.secuso.privacyfriendlytodolist.model.ModelObserver
+import org.secuso.privacyfriendlytodolist.overdue.OverdueChecker
 import org.secuso.privacyfriendlytodolist.service.JobManager
 import org.secuso.privacyfriendlytodolist.util.LogTag
 
@@ -31,12 +32,18 @@ object TaskChangeObserver: ModelObserver {
             Log.d(TAG, "$changedTasks tasks did change. Starting update-alarm-job.")
             JobManager.startUpdateAlarmJob(context)
         }
+        if (0 != changedTasks || 0 != changedSubtasks) {
+            OverdueChecker.check(context, "data changed")
+        }
     }
 
     override fun onTodoDataChangedOutsideAppUI(context: Context, changedLists: Int, changedTasks: Int, changedSubtasks: Int) {
         if (0 != changedTasks) {
             Log.d(TAG, "$changedTasks tasks did change from outside. Starting update-alarm-job.")
             JobManager.startUpdateAlarmJob(context)
+        }
+        if (0 != changedTasks || 0 != changedSubtasks) {
+            OverdueChecker.check(context, "data changed")
         }
     }
 }

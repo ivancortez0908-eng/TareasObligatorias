@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Floating panel with overdue tasks (Tareas Obligatorias). It intentionally has no close button. -->
+<!-- The outer FrameLayout provides the margin, because the root view added to a window has no margins. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingStart="8dp"
+    android:paddingTop="32dp"
+    android:paddingEnd="8dp"
+    android:paddingBottom="8dp">
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/overlay_panel_bg"
+    android:elevation="8dp"
+    android:orientation="vertical"
+    android:padding="12dp">
+
+    <TextView
+        android:id="@+id/overlay_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/overdue_accent"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:text="@string/overdue_overlay_subtitle"
+        android:textColor="@color/overdue_text_secondary"
+        android:textSize="13sp" />
+
+    <Button
+        android:id="@+id/overlay_minimize"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:minHeight="36dp"
+        android:textAllCaps="false"
+        android:textColor="@color/overdue_text_secondary" />
+
+    <org.secuso.privacyfriendlytodolist.overdue.MaxHeightScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:id="@+id/overlay_task_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+    </org.secuso.privacyfriendlytodolist.overdue.MaxHeightScrollView>
+</LinearLayout>
+</FrameLayout>

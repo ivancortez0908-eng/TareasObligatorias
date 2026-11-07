@@ -71,6 +71,35 @@ object PreferenceMgr {
     private val P_FIRST_DAY_OF_WEEK = PrefMetaData("pref_first_day_of_week", PrefDataType.STRING)
     val P_CONTENT_HOME = PrefMetaData("pref_content_home", PrefDataType.STRING)
 
+    // Overdue tasks / floating window (Tareas Obligatorias).
+    val P_OVERDUE_ENABLED = PrefMetaData("pref_overdue_enabled", PrefDataType.BOOLEAN)
+    val P_OVERDUE_REMINDER_IS_LIMIT = PrefMetaData("pref_overdue_reminder_is_limit", PrefDataType.BOOLEAN)
+    val P_OVERDUE_FULLSCREEN = PrefMetaData("pref_overdue_fullscreen", PrefDataType.BOOLEAN)
+    val P_OVERDUE_REQUIRE_KEY_POINTS = PrefMetaData("pref_overdue_require_key_points", PrefDataType.BOOLEAN)
+    val P_OVERDUE_RESHOW_MINUTES = PrefMetaData("pref_overdue_reshow_minutes", PrefDataType.STRING)
+
+    fun isOverdueEnabled(context: Context): Boolean =
+        PreferenceManager.getDefaultSharedPreferences(context).getBoolean(P_OVERDUE_ENABLED.name, true)
+
+    fun isOverdueReminderTheLimit(context: Context): Boolean =
+        PreferenceManager.getDefaultSharedPreferences(context).getBoolean(P_OVERDUE_REMINDER_IS_LIMIT.name, true)
+
+    fun isOverdueFullscreen(context: Context): Boolean =
+        PreferenceManager.getDefaultSharedPreferences(context).getBoolean(P_OVERDUE_FULLSCREEN.name, false)
+
+    fun isOverdueKeyPointsRequired(context: Context): Boolean =
+        PreferenceManager.getDefaultSharedPreferences(context).getBoolean(P_OVERDUE_REQUIRE_KEY_POINTS.name, true)
+
+    fun isAutoProgressEnabled(context: Context): Boolean =
+        PreferenceManager.getDefaultSharedPreferences(context).getBoolean(P_IS_AUTO_PROGRESS.name, false)
+
+    /** Minutes after which a minimized overdue window expands again by itself. */
+    fun getOverdueReshowMinutes(context: Context): Long {
+        val value = PreferenceManager.getDefaultSharedPreferences(context)
+            .getString(P_OVERDUE_RESHOW_MINUTES.name, "10")
+        return value?.toLongOrNull()?.coerceAtLeast(1L) ?: 10L
+    }
+
     fun setFirstTimeLaunch(context: Context, isFirstTimeLaunch: Boolean) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         prefs.edit { putBoolean(P_IS_FIRST_TIME_LAUNCH.name, isFirstTimeLaunch) }

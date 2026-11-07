@@ -25,6 +25,7 @@ import androidx.work.WorkManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import org.secuso.privacyfriendlytodolist.model.TodoTask
+import org.secuso.privacyfriendlytodolist.overdue.OverdueChecker
 import org.secuso.privacyfriendlytodolist.util.LogTag
 import org.secuso.privacyfriendlytodolist.util.Timestamp
 import org.secuso.privacyfriendlytodolist.view.widget.TodoListWidget
@@ -62,6 +63,7 @@ class PeriodicUpdater(private val context: Context,
                 } else {
                     Log.d(TAG, "0 recurring tasks were updated.")
                 }
+                OverdueChecker.check(applicationContext, "periodic update")
             }
         }
         catch (e: Exception) {

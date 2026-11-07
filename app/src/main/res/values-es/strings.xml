@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Application Specific -->
-	<string name="app_name">Lista de Tareas</string>
+	<string name="app_name">Tareas Obligatorias</string>
     <string name="app_name_long">Lista de Tareas respetuosa de la privacidad</string>
     <!-- Menu -->
     <string name="nav_header_app_name">Lista de Tareas</string>

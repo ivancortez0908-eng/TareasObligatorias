@@ -33,6 +33,8 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceGroup
 import androidx.preference.SwitchPreference
 import org.secuso.privacyfriendlytodolist.R
+import org.secuso.privacyfriendlytodolist.overdue.OverdueChecker
+import org.secuso.privacyfriendlytodolist.overdue.OverlayPermission
 import org.secuso.privacyfriendlytodolist.util.PreferenceMgr
 
 /**
@@ -84,6 +86,18 @@ class SettingsActivity : AppCompatActivity() {
 
             // initializes
             initSummary(preferenceScreen)
+
+            findPreference<Preference>(KEY_OVERDUE_PERMISSION)?.setOnPreferenceClickListener {
+                OverlayPermission.openPermissionSettings(requireActivity())
+                true
+            }
+        }
+
+        private fun updateOverduePermissionSummary() {
+            val preference = findPreference<Preference>(KEY_OVERDUE_PERMISSION) ?: return
+            preference.setSummary(
+                if (OverlayPermission.canDrawOverlays(requireContext())) R.string.overdue_settings_permission_granted
+                else R.string.overdue_settings_permission_missing)
         }
 
         private fun initSummary(p: Preference) {
@@ -105,6 +119,9 @@ class SettingsActivity : AppCompatActivity() {
 
             val sharedPreferences = preferenceManager.getSharedPreferences()!!
             sharedPreferences.registerOnSharedPreferenceChangeListener(this)
+            // The user may come back from the system permission screen.
+            updateOverduePermissionSummary()
+            OverdueChecker.check(requireContext(), "settings resumed")
         }
 
         override fun onPause() {
@@ -147,11 +164,16 @@ class SettingsActivity : AppCompatActivity() {
             }
             if (null != key) {
                 updatePrefSummary(findPreference(key))
+                if (key.startsWith("pref_overdue_")) {
+                    // Apply changed overdue settings (enable/disable, fullscreen, ...) right away.
+                    OverdueChecker.check(requireContext(), "setting $key changed")
+                }
             }
         }
     }
 
     companion object {
+        private const val KEY_OVERDUE_PERMISSION = "pref_overdue_permission"
         private const val MINIMAL_PIN_LENGTH = 4
         private const val MAXIMAL_PIN_LENGTH = 32
 

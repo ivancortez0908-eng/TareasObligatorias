@@ -32,12 +32,12 @@ android {
     }
 
     defaultConfig {
-        applicationId "org.secuso.privacyfriendlytodolist"
+        applicationId "org.tareasobligatorias.app"
         minSdkVersion 21
         targetSdkVersion 36
         compileSdkVersion 35
         versionCode 104
-        versionName "3.5.0"
+        versionName "3.5.0-obligatorias.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         ksp {
@@ -47,7 +47,7 @@ android {
 
     android.applicationVariants.configureEach { variant ->
         variant.outputs.configureEach {
-            def appName = "pfa-todo-list"
+            def appName = "tareas-obligatorias"
             outputFileName = appName + "-${variant.name}-v${variant.versionName}.apk"
         }
     }
@@ -56,6 +56,10 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+            // Tareas Obligatorias: sign the release APK with the own key (see pfa.properties).
+            if (pfaFile.exists()) {
+                signingConfig signingConfigs."pfa-key"
+            }
         }
 
         debug {

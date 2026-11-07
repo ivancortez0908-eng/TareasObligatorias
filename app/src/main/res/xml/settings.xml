@@ -76,4 +76,52 @@
         android:summary="%s"
         android:title="@string/pref_app_theme_title" />
 
+
+    <PreferenceCategory
+        android:key="pref_overdue_category"
+        android:title="@string/overdue_settings_category">
+
+        <SwitchPreference
+            android:key="pref_overdue_enabled"
+            android:defaultValue="true"
+            android:summary="@string/overdue_settings_enabled_summary"
+            android:title="@string/overdue_settings_enabled" />
+
+        <Preference
+            android:key="pref_overdue_permission"
+            android:dependency="pref_overdue_enabled"
+            android:persistent="false"
+            android:title="@string/overdue_settings_permission" />
+
+        <SwitchPreference
+            android:key="pref_overdue_reminder_is_limit"
+            android:defaultValue="true"
+            android:dependency="pref_overdue_enabled"
+            android:summary="@string/overdue_settings_reminder_is_limit_summary"
+            android:title="@string/overdue_settings_reminder_is_limit" />
+
+        <SwitchPreference
+            android:key="pref_overdue_require_key_points"
+            android:defaultValue="true"
+            android:dependency="pref_overdue_enabled"
+            android:summary="@string/overdue_settings_require_key_points_summary"
+            android:title="@string/overdue_settings_require_key_points" />
+
+        <ListPreference
+            android:key="pref_overdue_reshow_minutes"
+            android:defaultValue="10"
+            android:dependency="pref_overdue_enabled"
+            android:entries="@array/overdue_reshow_entries"
+            android:entryValues="@array/overdue_reshow_values"
+            android:summary="%s"
+            android:title="@string/overdue_settings_reshow" />
+
+        <SwitchPreference
+            android:key="pref_overdue_fullscreen"
+            android:defaultValue="false"
+            android:dependency="pref_overdue_enabled"
+            android:summary="@string/overdue_settings_fullscreen_summary"
+            android:title="@string/overdue_settings_fullscreen" />
+    </PreferenceCategory>
+
 </PreferenceScreen>

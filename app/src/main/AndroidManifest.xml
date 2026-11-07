@@ -11,12 +11,16 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"
         tools:ignore="ProtectedPermissions" />
-    <uses-permission android:name="org.secuso.privacyfriendlytodolist.TODO_PERMISSION" />
+    <!-- Tareas Obligatorias: floating window for overdue tasks and the service that keeps it alive. -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="${applicationId}.TODO_PERMISSION" />
     <uses-permission android:name="org.secuso.privacyfriendlyproductivitytimer.TODO_RE_PERMISSION" />
 
     <!-- Permission for TodoReceiver: -->
     <permission
-        android:name="org.secuso.privacyfriendlytodolist.TODO_PERMISSION"
+        android:name="${applicationId}.TODO_PERMISSION"
         android:protectionLevel="signature"
         android:label="@string/permission_todo_name"
         android:description="@string/permission_todo_description" />
@@ -135,6 +139,19 @@
                 <action android:name="org.secuso.privacyfriendlyproductivitytimer.TODO_RE_ACTION" />
             </intent-filter>
         </receiver>
+
+        <receiver
+            android:name=".overdue.OverdueCheckReceiver"
+            android:exported="false" />
+
+        <service
+            android:name=".overdue.OverdueService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Keeps a user-requested floating window with overdue to-do tasks on screen until the user completes them." />
+        </service>
 
         <service
             android:name=".service.JobInstanceMultiplier"

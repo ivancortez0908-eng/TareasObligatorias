@@ -63,6 +63,7 @@ import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 import org.secuso.privacyfriendlytodolist.R
 import org.secuso.privacyfriendlytodolist.model.Model
+import org.secuso.privacyfriendlytodolist.overdue.OverlayPermission
 import org.secuso.privacyfriendlytodolist.model.ModelObserver
 import org.secuso.privacyfriendlytodolist.model.ModelServices
 import org.secuso.privacyfriendlytodolist.model.TodoSubtask
@@ -246,6 +247,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         NotificationMgr.checkForPermissions(this) { permission ->
                             requestPermissionLauncher.launch(permission)
                         }
+                    }
+                    if (todoTask.hasReminderTime() || todoTask.hasDeadline()) {
+                        OverlayPermission.checkForPermission(this)
                     }
                 }
             }
@@ -454,6 +458,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         // Check if Pomodoro is installed
         pomodoroInstalled = checkIfPomodoroInstalled()
+
+        // Overdue tasks are shown in a floating window, which needs "display over other apps".
+        OverlayPermission.checkForPermission(this)
 
         // isUnlocked might be false when returning from another activity. See onUserLeaveHint().
         // Set to true if the unlock period was not expired:
@@ -1306,7 +1313,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private fun sendToPomodoro(pomodoro: Intent) {
         pomodoro.setPackage("org.secuso.privacyfriendlyproductivitytimer")
                 .flags = Intent.FLAG_INCLUDE_STOPPED_PACKAGES
-        sendBroadcast(pomodoro, "org.secuso.privacyfriendlytodolist.TODO_PERMISSION")
+        sendBroadcast(pomodoro, "$packageName.TODO_PERMISSION")
         finish()
     }
 

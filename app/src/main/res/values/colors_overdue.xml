@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="overdue_panel_bg">#FFFFFF</color>
+    <color name="overdue_card_bg">#FFF1F0</color>
+    <color name="overdue_text">#1B1B1B</color>
+    <color name="overdue_text_secondary">#5A5A5A</color>
+    <color name="overdue_accent">#C62828</color>
+    <color name="overdue_dim">#E6101418</color>
+</resources>

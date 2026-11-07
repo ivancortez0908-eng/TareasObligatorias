@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Application Specific -->
-    <string name="app_name">To-Do List</string>
+    <string name="app_name">Mandatory Tasks</string>
     <string name="app_name_long">Privacy Friendly To-Do List</string>
     <string name="initial_alert">CLICK + FOR NEW LIST</string>
     <string name="second_alert">ADD NEW TASK &gt;</string>

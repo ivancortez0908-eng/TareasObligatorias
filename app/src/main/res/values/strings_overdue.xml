@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Floating window -->
+    <plurals name="overdue_overlay_title">
+        <item quantity="one">⚠ %d overdue task</item>
+        <item quantity="other">⚠ %d overdue tasks</item>
+    </plurals>
+    <string name="overdue_overlay_subtitle">This window stays on screen until you finish your overdue tasks.</string>
+    <string name="overdue_minimize">Minimize (returns in %d min)</string>
+    <plurals name="overdue_since_days">
+        <item quantity="one">Overdue since %1$d day (deadline %2$s)</item>
+        <item quantity="other">Overdue since %1$d days (deadline %2$s)</item>
+    </plurals>
+    <string name="overdue_since_time">Time limit passed: %s</string>
+    <string name="overdue_priority">Priority: %s</string>
+    <string name="overdue_key_points">Key points:</string>
+    <string name="overdue_done_hint">Check all key points to be able to finish this task.</string>
+    <string name="overdue_open">Open</string>
+    <string name="overdue_done">✔ Done</string>
+    <string name="overdue_bubble_description">Overdue tasks. Tap to show them.</string>
+
+    <!-- Notification -->
+    <string name="overdue_channel_name">Overdue tasks</string>
+    <string name="overdue_channel_desc">Permanent alert while there are overdue tasks.</string>
+    <plurals name="overdue_notification_title">
+        <item quantity="one">%d overdue task</item>
+        <item quantity="other">%d overdue tasks</item>
+    </plurals>
+    <string name="overdue_notification_no_permission">Allow \"display over other apps\" to see the floating window</string>
+
+    <!-- Permission dialog -->
+    <string name="overdue_permission_dialog_title">Floating window</string>
+    <string name="overdue_permission_dialog_message">To show overdue tasks on top of other apps, allow \"Display over other apps\" for this app in the next screen.</string>
+    <string name="overdue_permission_dialog_ok">Allow</string>
+    <string name="overdue_permission_dialog_later">Later</string>
+
+    <!-- Settings -->
+    <string name="overdue_settings_category">Overdue tasks (floating window)</string>
+    <string name="overdue_settings_enabled">Show overdue tasks in a floating window</string>
+    <string name="overdue_settings_enabled_summary">Stays on top of other apps until the task is done</string>
+    <string name="overdue_settings_permission">Permission \"display over other apps\"</string>
+    <string name="overdue_settings_permission_granted">Granted</string>
+    <string name="overdue_settings_permission_missing">Not granted – tap to allow</string>
+    <string name="overdue_settings_reminder_is_limit">Reminder time is the time limit</string>
+    <string name="overdue_settings_reminder_is_limit_summary">A task is also overdue when its reminder time has passed, not only when its deadline day has passed</string>
+    <string name="overdue_settings_require_key_points">Require all key points</string>
+    <string name="overdue_settings_require_key_points_summary">A task can only be finished in the floating window after checking all its subtasks</string>
+    <string name="overdue_settings_fullscreen">Strict mode (full screen)</string>
+    <string name="overdue_settings_fullscreen_summary">The window covers the whole screen and blocks the phone until you finish or minimize it</string>
+    <string name="overdue_settings_reshow">Minimize for</string>
+    <string-array name="overdue_reshow_entries">
+        <item>2 minutes</item>
+        <item>5 minutes</item>
+        <item>10 minutes</item>
+        <item>15 minutes</item>
+        <item>30 minutes</item>
+        <item>60 minutes</item>
+    </string-array>
+    <string-array name="overdue_reshow_values" translatable="false">
+        <item>2</item>
+        <item>5</item>
+        <item>10</item>
+        <item>15</item>
+        <item>30</item>
+        <item>60</item>
+    </string-array>
+</resources>

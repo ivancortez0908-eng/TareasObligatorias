@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strict mode: dims and blocks the whole screen until the tasks are done or the window is minimized. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/overdue_dim"
+    android:clickable="true"
+    android:focusable="false">
+
+    <include
+        layout="@layout/overlay_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical" />
+</FrameLayout>
