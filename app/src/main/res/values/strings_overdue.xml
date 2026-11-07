@@ -16,6 +16,10 @@
     <string name="overdue_key_points">Key points:</string>
     <string name="overdue_done_hint">Check all key points to be able to finish this task.</string>
     <string name="overdue_open">Open</string>
+    <string name="overdue_open_app">Open app</string>
+    <string name="overdue_fullscreen_dialog_title">Full screen alert</string>
+    <string name="overdue_fullscreen_dialog_message">To show overdue tasks like an alarm clock (also on the lock screen), allow \"Full screen notifications\" for this app in the next screen.</string>
+    <string name="overdue_settings_overlay_not_supported">Not available on this phone (Android Go does not allow floating windows). A full screen alert is used instead.</string>
     <string name="overdue_done">✔ Done</string>
     <string name="overdue_bubble_description">Overdue tasks. Tap to show them.</string>
 

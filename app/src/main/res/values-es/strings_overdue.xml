@@ -16,6 +16,10 @@
     <string name="overdue_key_points">Puntos clave:</string>
     <string name="overdue_done_hint">Marca todos los puntos clave para poder terminar esta tarea.</string>
     <string name="overdue_open">Abrir</string>
+    <string name="overdue_open_app">Abrir app</string>
+    <string name="overdue_fullscreen_dialog_title">Alerta de pantalla completa</string>
+    <string name="overdue_fullscreen_dialog_message">Para mostrar las tareas vencidas como un despertador (también en la pantalla de bloqueo), permite \"Notificaciones de pantalla completa\" para esta app en la siguiente pantalla.</string>
+    <string name="overdue_settings_overlay_not_supported">No disponible en este teléfono (Android Go no permite ventanas flotantes). En su lugar se usa una alerta de pantalla completa.</string>
     <string name="overdue_done">✔ Terminada</string>
     <string name="overdue_bubble_description">Tareas vencidas. Toca para verlas.</string>
 

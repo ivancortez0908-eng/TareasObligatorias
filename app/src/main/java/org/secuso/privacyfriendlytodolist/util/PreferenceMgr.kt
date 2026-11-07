@@ -79,6 +79,9 @@ object PreferenceMgr {
     val P_OVERDUE_REQUIRE_KEY_POINTS = PrefMetaData("pref_overdue_require_key_points", PrefDataType.BOOLEAN)
     val P_OVERDUE_RESHOW_MINUTES = PrefMetaData("pref_overdue_reshow_minutes", PrefDataType.STRING)
 
+    fun isPinEnabled(context: Context): Boolean =
+        PreferenceManager.getDefaultSharedPreferences(context).getBoolean(P_IS_PIN_ENABLED.name, false)
+
     fun isOverdueEnabled(context: Context): Boolean =
         PreferenceManager.getDefaultSharedPreferences(context).getBoolean(P_OVERDUE_ENABLED.name, true)
 

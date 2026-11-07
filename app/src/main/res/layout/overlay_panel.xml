@@ -44,6 +44,7 @@
         android:textColor="@color/overdue_text_secondary" />
 
     <org.secuso.privacyfriendlytodolist.overdue.MaxHeightScrollView
+        android:id="@+id/overlay_scroll"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 

@@ -95,6 +95,22 @@ object OverdueChecker {
         return next
     }
 
+    private fun filterOverdue(context: Context, tasks: List<TodoTask>, now: Timestamp): List<TodoTask> {
+        val reminderIsLimit = PreferenceMgr.isOverdueReminderTheLimit(context)
+        return tasks.filter { isOverdue(it, now, reminderIsLimit) }
+            // Priority enum is declared HIGH, MEDIUM, LOW: lower ordinal = more important.
+            .sortedWith(compareBy<TodoTask> { it.getPriority().ordinal }
+                .thenBy { it.getDeadline()?.timeInSeconds ?: Long.MAX_VALUE })
+    }
+
+    /** Loads the overdue tasks, sorted by priority. The result is delivered to the main thread. */
+    fun loadOverdueTasks(context: Context, consumer: (List<TodoTask>) -> Unit) {
+        val appContext = context.applicationContext
+        getViewModel(appContext).model.getAllToDoTasks { tasks ->
+            consumer(filterOverdue(appContext, tasks, Timestamp.createCurrent()))
+        }
+    }
+
     /**
      * Loads all tasks, shows or hides the floating window and schedules the next check.
      * Can be called from any thread that has a looper (results are delivered to the main thread).
@@ -113,17 +129,14 @@ object OverdueChecker {
             try {
                 val now = Timestamp.createCurrent()
                 val reminderIsLimit = PreferenceMgr.isOverdueReminderTheLimit(appContext)
-                val overdue = tasks.filter { isOverdue(it, now, reminderIsLimit) }
-                    // Priority enum is declared HIGH, MEDIUM, LOW: lower ordinal = more important.
-                    .sortedWith(compareBy<TodoTask> { it.getPriority().ordinal }
-                        .thenBy { it.getDeadline()?.timeInSeconds ?: Long.MAX_VALUE })
+                val overdue = filterOverdue(appContext, tasks, now)
                 Log.d(TAG, "Overdue check ($reason): ${overdue.size} of ${tasks.size} tasks are overdue.")
                 var nextCheck = computeNextTransition(tasks, now, reminderIsLimit)
                 if (overdue.isEmpty()) {
                     OverdueOverlay.hide(appContext)
                     OverdueNotifier.cancel(appContext)
                 } else {
-                    if (PreferenceMgr.isOverdueOverlayUsed(appContext)) {
+                    if (OverlayPermission.isOverlayUsed(appContext)) {
                         OverdueOverlay.show(appContext, overdue)
                     } else {
                         OverdueOverlay.hide(appContext)

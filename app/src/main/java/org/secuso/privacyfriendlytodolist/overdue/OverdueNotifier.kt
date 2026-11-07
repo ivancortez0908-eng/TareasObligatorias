@@ -31,7 +31,6 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import org.secuso.privacyfriendlytodolist.R
 import org.secuso.privacyfriendlytodolist.model.TodoTask
-import org.secuso.privacyfriendlytodolist.util.PreferenceMgr
 import org.secuso.privacyfriendlytodolist.view.MainActivity
 
 /**
@@ -83,9 +82,14 @@ object OverdueNotifier {
             return
         }
         createChannel(context)
-        val openIntent = Intent(context, MainActivity::class.java)
+        // Tapping the notification shows the overdue tasks screen.
+        val alertIntent = Intent(context, OverdueActivity::class.java)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        val pendingIntent = PendingIntent.getActivity(context, NOTIFICATION_ID, openIntent,
+        val pendingIntent = PendingIntent.getActivity(context, NOTIFICATION_ID, alertIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        val appIntent = Intent(context, MainActivity::class.java)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        val appPendingIntent = PendingIntent.getActivity(context, NOTIFICATION_ID + 1, appIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         val title = context.resources.getQuantityString(R.plurals.overdue_notification_title, count, count)
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
@@ -98,9 +102,14 @@ object OverdueNotifier {
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .setOngoing(true)
             .setContentIntent(pendingIntent)
-            .addAction(0, context.getString(R.string.overdue_open), pendingIntent)
-        if (PreferenceMgr.isOverdueOverlayUsed(context) && !OverlayPermission.canDrawOverlays(context)) {
+            .addAction(0, context.getString(R.string.overdue_open_app), appPendingIntent)
+        if (OverlayPermission.isOverlayUsed(context) && !OverlayPermission.canDrawOverlays(context)) {
             builder.setSubText(context.getString(R.string.overdue_notification_no_permission))
+        }
+        if (alert && !OverlayPermission.isOverlayActive(context)) {
+            // No floating window (e.g. Android Go): alert like an alarm clock. With the screen off or
+            // locked the tasks screen opens directly, otherwise Android shows a pop-up notification.
+            builder.setFullScreenIntent(pendingIntent, true)
         }
         try {
             NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, builder.build())

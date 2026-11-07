@@ -91,6 +91,15 @@ class SettingsActivity : AppCompatActivity() {
                 OverlayPermission.openPermissionSettings(requireActivity())
                 true
             }
+            if (!OverlayPermission.isOverlaySupported(requireContext())) {
+                // Android Go: floating windows are not allowed for any app.
+                findPreference<SwitchPreference>(PreferenceMgr.P_OVERDUE_USE_OVERLAY.name)?.apply {
+                    isEnabled = false
+                    setSummary(R.string.overdue_settings_overlay_not_supported)
+                }
+                findPreference<Preference>(KEY_OVERDUE_PERMISSION)?.isVisible = false
+                findPreference<Preference>(PreferenceMgr.P_OVERDUE_FULLSCREEN.name)?.isVisible = false
+            }
         }
 
         private fun updateOverduePermissionSummary() {

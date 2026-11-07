@@ -32,12 +32,10 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import android.widget.Button
-import android.widget.CheckBox
 import android.widget.LinearLayout
 import android.widget.TextView
 import org.secuso.privacyfriendlytodolist.R
 import org.secuso.privacyfriendlytodolist.model.TodoTask
-import org.secuso.privacyfriendlytodolist.util.Helper
 import org.secuso.privacyfriendlytodolist.util.LogTag
 import org.secuso.privacyfriendlytodolist.util.NotificationMgr
 import org.secuso.privacyfriendlytodolist.util.PreferenceMgr
@@ -240,104 +238,24 @@ object OverdueOverlay {
             setOnClickListener { minimize() }
         }
         val container = view.findViewById<LinearLayout>(R.id.overlay_task_container)
-        container.removeAllViews()
-        val inflater = LayoutInflater.from(themedContext())
-        for (task in tasks) {
-            val item = inflater.inflate(R.layout.overlay_task_item, container, false)
-            bindTask(item, task, now)
-            container.addView(item)
-        }
+        OverdueTaskViews.bindTaskList(themedContext(), container, tasks, taskListener)
     }
 
-    private fun bindTask(item: View, task: TodoTask, now: Timestamp) {
-        val context = appContext!!
-        item.findViewById<TextView>(R.id.overlay_task_name).text = task.getName()
-
-        val info = StringBuilder()
-        val deadline = task.getDeadline()
-        if (deadline != null && !task.isRecurring() && deadline.timeInDays < now.timeInDays) {
-            val days = (now.timeInDays - deadline.timeInDays).toInt()
-            info.append(context.resources.getQuantityString(R.plurals.overdue_since_days, days, days,
-                deadline.createLocalizedDateString()))
-        } else {
-            val reminder = task.getReminderTime()
-            if (reminder != null) {
-                info.append(context.getString(R.string.overdue_since_time, reminder.createLocalizedDateTimeString()))
-            }
-        }
-        info.append(" · ").append(context.getString(R.string.overdue_priority,
-            Helper.priorityToString(context, task.getPriority())))
-        item.findViewById<TextView>(R.id.overlay_task_info).text = info
-
-        val description = item.findViewById<TextView>(R.id.overlay_task_description)
-        if (task.getDescription().isBlank()) {
-            description.visibility = View.GONE
-        } else {
-            description.visibility = View.VISIBLE
-            description.text = task.getDescription()
-        }
-
-        val subtasks = task.getSubtasks().filter { !it.isInRecycleBin() }
-        val keyPointsTitle = item.findViewById<TextView>(R.id.overlay_key_points_title)
-        val keyPoints = item.findViewById<LinearLayout>(R.id.overlay_key_points)
-        keyPoints.removeAllViews()
-        keyPointsTitle.visibility = if (subtasks.isEmpty()) View.GONE else View.VISIBLE
-        for (subtask in subtasks) {
-            val checkBox = CheckBox(themedContext())
-            checkBox.text = subtask.getName()
-            checkBox.isChecked = subtask.isDone()
-            checkBox.setOnCheckedChangeListener { _, isChecked ->
-                setSubtaskDone(task, subtask, isChecked)
-            }
-            keyPoints.addView(checkBox)
-        }
-
-        val allKeyPointsDone = subtasks.all { it.isDone() }
-        val keyPointsRequired = PreferenceMgr.isOverdueKeyPointsRequired(context)
-        val doneButton = item.findViewById<Button>(R.id.overlay_task_done)
-        val hint = item.findViewById<TextView>(R.id.overlay_task_done_hint)
-        val canFinish = allKeyPointsDone || !keyPointsRequired
-        doneButton.isEnabled = canFinish
-        hint.visibility = if (canFinish) View.GONE else View.VISIBLE
-        doneButton.setOnClickListener { setTaskDone(task) }
-
-        item.findViewById<Button>(R.id.overlay_task_open).setOnClickListener { openTask(task) }
-    }
-
-    private fun setSubtaskDone(task: TodoTask, subtask: org.secuso.privacyfriendlytodolist.model.TodoSubtask, isDone: Boolean) {
-        val context = appContext ?: return
-        if (subtask.isDone() == isDone) {
-            return
-        }
-        subtask.setDone(isDone)
-        subtask.setChanged()
-        val model = OverdueChecker.getViewModel(context).model
-        model.saveTodoSubtaskInDb(subtask) {
-            if (PreferenceMgr.isAutoProgressEnabled(context) && task.computeProgress()) {
-                task.setChanged()
-                model.saveTodoTaskInDb(task)
-            }
-            model.notifyDataChangedOutsideAppUI(0, 0, 1)
+    private val taskListener = object : OverdueTaskViews.Listener {
+        override fun onKeyPointChanged() {
             // Re-render to enable / disable the done button.
             render()
         }
-    }
 
-    private fun setTaskDone(task: TodoTask) {
-        val context = appContext ?: return
-        task.setDone(true)
-        task.setChanged()
-        NotificationMgr.cancelNotification(context, task.getId())
-        val model = OverdueChecker.getViewModel(context).model
-        model.saveTodoTaskInDb(task) { counter ->
-            if (counter > 0) {
-                model.notifyDataChangedOutsideAppUI(0, counter, 0)
-            }
-            OverdueChecker.check(context, "task done")
+        override fun onTaskDone(task: TodoTask) {
+            // Remove the task from the window immediately; the following check confirms the state.
+            tasks = tasks.filter { it.getId() != task.getId() }
+            render()
         }
-        // Remove the task from the window immediately; the check above confirms the state.
-        tasks = tasks.filter { it.getId() != task.getId() }
-        render()
+
+        override fun onOpenTask(task: TodoTask) {
+            openTask(task)
+        }
     }
 
     private fun openTask(task: TodoTask) {

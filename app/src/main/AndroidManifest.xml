@@ -13,6 +13,8 @@
         tools:ignore="ProtectedPermissions" />
     <!-- Tareas Obligatorias: optional floating window for overdue tasks. -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <!-- Full screen alert (like an alarm clock) where the floating window is not possible, e.g. Android Go. -->
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <uses-permission android:name="${applicationId}.TODO_PERMISSION" />
     <uses-permission android:name="org.secuso.privacyfriendlyproductivitytimer.TODO_RE_PERMISSION" />
 
@@ -50,6 +52,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".overdue.OverdueActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:taskAffinity="${applicationId}.overdue"
+            android:theme="@style/AppTheme" />
         <activity
             android:name=".view.TutorialActivity"
             android:parentActivityName="view.MainActivity"
