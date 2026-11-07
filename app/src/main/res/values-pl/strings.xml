@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Application Specific -->
+	<string name="app_name">Lista zadań</string>
+    <string name="app_name_long">Privacy Friendly Lista zadań</string>
+    <!-- Menu -->
+    <string name="nav_header_app_name">Zadania</string>
+    <string name="toolbar_title_main">Zadania</string>
+    <string name="todos">Zadania</string>
+    <string name="tasks">Zadania</string>
+    <string name="calendar_view">Kalendarz</string>
+    <string name="show_all_tasks">Wszystkie zadania</string>
+    <string name="settings">Ustawienia</string>
+    <string name="other">Inne</string>
+    <string name="help">Pomoc</string>
+    <string name="menu_about">O nas</string>
+    <string name="search">Szukaj</string>
+    <!-- Common UI strings -->
+    <string name="navigation_drawer_open">Otwórz menu</string>
+    <string name="navigation_drawer_close">Zamknij menu</string>
+    <string name="name">Nazwa</string>
+    <string name="description_hint">Opis</string>
+    <string name="ok">OK</string>
+    <!-- Common model strings -->
+    <string name="select_option">Wybierz</string>
+    <string name="high_priority">Bardzo ważne</string>
+    <string name="medium_priority">Średnio ważne</string>
+    <string name="low_priority">Mało ważne</string>
+    <string name="yes">Tak</string>
+    <string name="no">Nie</string>
+    <!-- Help -->
+    <string name="help_overview_heading">Podgląd</string>
+    <string name="help_intro">Aplikacja może być użyta aby zorganizować zadania.</string>
+    <string name="help_group_lists">Administrowanie list zadań</string>
+    <string name="help_todo_lists_title">Listy zadań</string>
+    <string name="help_todo_lists">Lista zadań jest zbiorem zadań i można je stworzyć, używając klawisza + w głównym menu. Zadania wewnątrz listy mogą być zaznaczane i odznaczane jako wykonane.</string>
+    <string name="help_subtasks_title">Podzadania</string>
+    <string name="help_subtasks">Podzadania to kolejne kroki, które składają się na całe zadanie. Można je wprowadzić, klikając na zadanie w otwartej liście zadań.</string>
+    <string name="help_deadline_reminder_title">Terminy i alarmy</string>
+    <string name="help_deadline_reminder">Terminy i alarmy można utworzyć tylko dla poszczególnych zadań. Możesz je wprowadzić przy tworzeniu zadania lub przy jego edycji. Naciśnij na zadanie i przytrzymaj przycisk, aby rozpocząć edycję.</string>
+    <string name="help_group_app">Aplikacja</string>
+    <string name="help_pin_title">Hasło</string>
+    <string name="help_pin">Wejdź w ustawienia, aby utworzyć hasło. Hasło musi się składać z 4 cyfr. Będziesz musiał je wprowadzić przy uruchamianiu aplikacji.</string>
+    <string name="help_group_privacy">Informacja o prywatności</string>
+    <string name="help_permission_receive_boot_completed">RECEIVE_BOOT_COMPLETED: Pozwala to aplikacji na sprawdzenie, czy użytkownik chce zostać poinformowany o nadchodzących terminach tuż po uruchomieniu urządzenia.</string>
+    <!-- About -->
+    <string name="about">O aplikacji</string>
+    <string name="version_number">Wersja %1$s</string>
+    <string name="about_author">Autorzy:</string>
+    <string name="about_author_contributors">i współtwórcy.</string>
+    <string name="about_affiliation">We współpracy z</string>
+    <string name="privacy_friendly">Ta aplikacja należy do grupy aplikacji przyjaznych prywatności opracowanych przez Instytut Technologii w Karlsruhe. Kod źródłowy jest licencjonowany na podstawie licencji GPLv3. Prawa autorskie do obrazów przysługują KIT i Google Inc.</string>
+    <string name="more_info">Więcej informacji można znaleźć na:</string>
+    <!-- To-Do list overview -->
+	<string name="done">zrobione</string>
+    <string name="no_todo_lists_available">Lista zadań niedostępna.</string>
+    <string name="next_deadline_dd">Następny termin: %1$s</string>
+    <string name="no_next_deadline">Brak terminów</string>
+    <string name="add_list_feedback">%1$s dodane</string>
+    <string name="edit_todo_list">Edytuj listę zadań</string>
+    <string name="delete_list">Usuń listę</string>
+    <string name="delete_list_feedback">%1$s usunięte</string>
+    <!-- Create/Edit To-Do list dialog -->
+    <string name="new_todo_list">Nowa lista zadań</string>
+    <string name="list_name_must_not_be_empty">Lista zadań nie może być pusta.</string>
+    <string name="show_description">Pokaż opis</string>
+    <string name="no_description_available">Opis niedostępny.</string>
+    <!-- To-Do tasks overview -->
+    <string name="empty_todo_list">Lista zadań jest pusta</string>
+    <string name="all_tasks">Wszystkie zadania</string>
+    <string name="open_tasks">Nieskończone zadania</string>
+    <string name="completed_tasks">Skończone zadania</string>
+    <string name="group_by_priority">Grupuj pod względem ważności</string>
+    <string name="sort_by_deadline">Sortuj terminami</string>
+    <string name="add_subtask">Dodaj podzadanie</string>
+    <!-- Create/Edit To-Do task dialog -->
+    <string name="new_todo_task">Nowe zadanie</string>
+    <string name="deadline_dd">Termin:</string>
+    <string name="no_deadline">Brak terminu</string>
+    <string name="edit_task">Edytuj zadanie</string>
+    <string name="remove_task">Usuń zadanie</string>
+    <string name="task_removed">Zadanie zostało usunięte.</string>
+    <string name="deadline">Termin</string>
+    <string name="reminder">Alarm</string>
+    <string name="deadline_smaller_reminder">Termin zadania nie może wypadać przed alarmem.</string>
+    <string name="set_deadline_before_reminder">Wprowadź najpierw termin zadania.</string>
+    <string name="progress_colon">Postępy:</string>
+    <string name="priority_colon">Poziom ważności:</string>
+    <string name="zero_percent" formatted="false">0 %</string>
+    <string name="select_priority">Poziom słabości:</string>
+    <string name="new_todo_subtask">Nowe podzadanie</string>
+    <string name="todo_name_must_not_be_empty">Wymagana nazwa.</string>
+    <string name="edit_subtask">Edytuj podzadanie</string>
+    <string name="delete_subtask">Usuń podzadanie</string>
+    <string name="subtask_removed">Podzadanie zostało usunięte.</string>
+    <!-- Select reminder dialog -->
+	<string name="date">Data</string>
+    <string name="time">Godzina</string>
+    <string name="no_reminder">Brak alarmu</string>
+    <!-- Calendar view -->
+    <string name="calendar">Kalendarz</string>
+    <string name="no_deadline_today">Brak terminów w tym dniu.</string>
+    <!-- PIN -->
+	<string name="enter_pin">Wprowadź hasło</string>
+    <string name="wrong_pin">Nieprawidłowe hasło</string>
+    <string name="reset_application_button">Resetuj aplikację</string>
+    <string name="invalid_pin">Proszę wprowadzić hasło z 4 cyframi!.</string>
+    <string name="reset_application_msg">Naprawdę chcesz zresetować tę aplikację? Zabezpieczenie hasłem zostanie wycofane, a wszystkie listy zadań usunięte.</string>
+    <string name="add_pin">Wprowadź hasło, aby umożliwić dostęp do aplikacji. Hasło musi zawierać przynajmniej 4 cyfry.</string>
+    <!-- Settings -->
+	<string name="default_reminder_time">Domyślny alarm</string>
+    <string-array name="default_reminder_times_human">
+        <item>Razem z terminem</item>
+        <item>0.5 dnia wcześniej</item>
+        <item>1 dzeń wcześniej</item>
+        <item>1.5 dnia wcześniej</item>
+        <item>2 dni wcześniej</item>
+        <item>2.5 dnia wcześniej</item>
+        <item>3 dni wcześniej</item>
+    </string-array>
+    <string name="pin_enabled">Aktywne hasło</string>
+    <string name="set_pin">Ustaw hasło</string>
+    <!-- Reminder service -->
+    <string name="deadline_approaching">Zbliża się termin: %1$s</string>
+    <!-- Date and Time -->
+    <string name="monday">Poniedziałek</string>
+    <string name="tuesday">Wtorek</string>
+    <string name="wednesday">Środa</string>
+    <string name="thursday">Czwartek</string>
+    <string name="friday">Piątek</string>
+    <string name="saturday">Sobota</string>
+    <string name="sunday">Niedziela</string>
+    <string name="monday_abbr">Pon</string>
+    <string name="tuesday_abbr">Wt</string>
+    <string name="wednesday_abbr">Śr</string>
+    <string name="thursday_abbr">Czw</string>
+    <string name="friday_abbr">Pt</string>
+    <string name="saturday_abbr">Sob</string>
+    <string name="sunday_abbr">Nie</string>
+    <string name="january">Styczeń</string>
+    <string name="february">Luty</string>
+    <string name="march">Marzec</string>
+    <string name="april">Kwiecień</string>
+    <string name="may">Maj</string>
+    <string name="june">Czerwiec</string>
+    <string name="july">Lipiec</string>
+    <string name="august">Sierpień</string>
+    <string name="september">Wrzesień</string>
+    <string name="october">Październik</string>
+    <string name="november">Listopad</string>
+    <string name="december">Grudzień</string>
+    <string name="initial_alert">KLIKNIJ +, ABY UTWORZYĆ NOWĄ LISTĘ</string>
+    <string name="export_list">Eksportuj listę</string>
+    <string name="edit_todo_task">Edytuj zadanie do wykonania</string>
+    <string name="share_task">Udostępnij zadanie</string>
+    <string name="select_list">Wybierz listę:</string>
+    <string name="import_tasks">Importuj dane</string>
+    <string name="second_alert">DODAJ NOWE ZADANIE &gt;</string>
+    <string name="share_list">Udostępnij listę</string>
+    <string name="sort_by_name_asc">Sortuj według nazwy</string>
+    <string name="export_all_tasks">Eksportuj dane</string>
+    <string name="share_all_tasks">Udostępnij dane</string>
+    <string name="cancel">Anuluj</string>
+    <string name="edit_list">Edytuj listę</string>
+    <string name="remove_all_done_tasks">Usuń wszystkie wykonane zadania</string>
+    <string name="tasks_removed">Usunięto %1$d zadań i %2$d podzadań.</string>
+    <string name="help_data_backup">Możesz skorzystać z oddzielnej aplikacji Privacy Friendly Backup, aby wykonać kopię zapasową i przywrócić dane i ustawienia tej aplikacji. Można jej również użyć do przeniesienia danych na inne urządzenie.</string>
+    <string name="help_group_widget">Widżet</string>
+    <string name="move_down_list">Przesuń listę w dół</string>
+    <string name="recurrence_every">Powtarzaj co</string>
+    <string name="to_choose_list">Wybierz listę!</string>
+    <string name="click_to_choose">Dotknij, aby wybrać!</string>
+    <string name="list_colon">Lista:</string>
+    <string name="notify">Włącz dźwięk powiadomienia</string>
+    <string name="dialog_need_permission_exact_alarm_title">Włącz dokładne przypomnienia</string>
+    <string name="none">Brak</string>
+    <string name="days">Dni</string>
+    <string name="weeks">Tygodni</string>
+    <string name="tutorial">Samouczek</string>
+    <string name="months">Miesięcy</string>
+    <string name="years">Lat</string>
+    <string name="slide3_heading">Przypomnienia</string>
+    <string name="slide3_text">Możesz określić terminy i przypomnienia dla swoich zadań.</string>
+    <string name="slide4_heading">Wszystko jest ważne</string>
+    <string name="slide5_heading">Bezpieczeństwo</string>
+    <string name="slide5_text">W ustawieniach możesz dodać zabezpieczenie kodem PIN.</string>
+    <string name="toast_del">Kosz został wyczyszczony.</string>
+    <string name="bin">Kosz</string>
+    <string name="bin_toolbar">Kosz</string>
+    <string name="btn_clear">Wyczyść kosz</string>
+    <string name="bin_empty">Kosz jest pusty</string>
+    <string name="restore">Przywróć zadanie</string>
+    <string name="todo_activity">Zadania do wykonania</string>
+    <string name="add_widget">Dodaj widżet</string>
+    <string name="widget_configuration">Ustawienia widżetu</string>
+    <string name="snack_check">Zmieniono status zadania</string>
+    <string name="snack_undo">Cofnij</string>
+    <string name="snack_clear">Kosz został wyczyszczony</string>
+    <string name="permission_todo_name">Integracja z TODO</string>
+    <string name="help_permission_schedule_exact_alarm">SCHEDULE_EXACT_ALARM: Pozwala to aplikacji na wyświetlanie przypomnień o dokładnym czasie.</string>
+    <string name="help_group_export_import">Eksport/import danych</string>
+    <string name="slide1_text">Witamy w przyjaznej dla prywatności liście rzeczy do zrobienia. Ta aplikacja nie zawiera śledzenia ani reklam.</string>
+    <string name="help_permission_post_notifications">POST_NOTIFICATIONS: Pozwala to aplikacji na wyświetlanie przypomnień o zbliżających się zadaniach.</string>
+    <string name="help_sound">Możesz też wybrać, czy po otrzymaniu powiadomienia ma zostać odtworzony dźwięk powiadomienia.</string>
+    <string name="slide4_text">Możesz dodać podzadania i postęp głównego zadania. Postęp można ustawić ręcznie lub automatycznie według liczby wykonanych podzadań.</string>
+    <string name="help_group_data_backup">Kopia zapasowa danych</string>
+    <string name="move_up_list">Przesuń listę w górę</string>
+    <string name="select_no_list">Bez listy</string>
+    <string name="help_privacy">Ta aplikacja nie zawiera śledzenia ani reklam. Nie są używane żadne uprawnienia poza tymi wymienionymi poniżej.</string>
+    <string name="slide1_heading">Witamy!</string>
+    <string name="slide2_heading">Listy</string>
+    <string name="pref_app_theme_title">Motyw</string>
+    <string name="okay">OK</string>
+    <string name="next">Dalej</string>
+    <string name="skip">Pomiń</string>
+    <string name="recurrence_interval_hint">1..n</string>
+    <string name="recurrence_pattern_hint">Wzór powtarzalności</string>
+    <string name="select_recurrence_pattern">Wybierz wzór powtarzania:</string>
+    <string name="reminder_smaller_now">Tylko zadania cykliczne mogą mieć czas przypomnienia w przeszłości.</string>
+    <string name="set_deadline_if_recurring">Powtarzające się zadanie wymaga terminu wykonania.</string>
+    <string name="recurrence_interval_invalid">Interwał rekurencji nie jest liczbą całkowitą ≥ 1.</string>
+    <string name="help_export">Dane tej aplikacji można eksportować w formacie CSV (wartości rozdzielone przecinkami, kodowanie UTF-8) w celu dalszego przetwarzania w innych aplikacjach.</string>
+    <string name="help_import">Dane tej aplikacji można importować z pliku w formacie CSV. Format tego pliku odpowiada formatowi pliku eksportu CSV.</string>
+    <string name="help_widget">Ponadto ta aplikacja zapewnia widżet, który możesz dodać do ekranu głównego. Widget prezentuje zadania należące do wybranej listy. Kliknięcie zadania prowadzi do głównego widoku aplikacji.</string>
+    <string name="system_default">Domyślne ustawienie systemu</string>
+    <string name="help_recurring_tasks">W przypadku zadań regularnie powtarzających się można skonfigurować wzorzec powtarzania. Jeśli ustawiono również przypomnienie, będzie się ono powtarzać zgodnie z wybranym wzorcem. Po odznaczeniu zadania, znacznik wyboru zostanie automatycznie usunięty po upływie kolejnego terminu.</string>
+    <string name="about_privacy_heading">Aplikacje przyjazne dla prywatności</string>
+    <string name="about_secuso">SECUSO – Bezpieczeństwo, użyteczność, społeczeństwo</string>
+    <string name="all_tasks_not_in_list">Zadania, które nie są przypisane do listy</string>
+    <string name="work_subtask">Pracuj nad tym podzadaniem</string>
+    <string name="work_task">Pracuj nad tym zadaniem</string>
+    <string name="move_up">Przenieś w górę</string>
+    <string name="move_down">Przenieś w dół</string>
+    <string name="cant_move_task_if_diff_lists">Nie można przenieść zadania, jeśli wyświetlane są różne listy.</string>
+    <string name="cant_move_task_if_filter_group_sort">Nie można przenieść zadania, jeśli aktywne jest filtrowanie, grupowanie lub sortowanie.</string>
+    <string name="snooze_duration">Czas drzemki przypomnień</string>
+    <string name="pref_content_home_title">Zawartość ekranu głównego</string>
+    <string name="list_quick_access">Szybki dostęp do list</string>
+    <string name="expand_tasks_with_subtasks">Rozwiń zadania, które mają podzadania</string>
+    <string name="auto_progress">Postęp według podzadań</string>
+    <string name="pref_first_day_of_week_title">Pierwszy dzień tygodnia</string>
+    <string name="dialog_need_permission_exact_alarm_message">Wymagana jest zgoda na planowanie dokładnych przypomnień. W przeciwnym razie przypomnienia będą niedokładne.</string>
+    <string name="dialog_need_permission_post_notifications_title">Włącz powiadomienia</string>
+    <string name="dialog_need_permission_post_notifications_message">Wymagana jest zgoda na wyświetlanie powiadomień o przypomnieniach. W przeciwnym razie przypomnienia nie będą wyświetlane.</string>
+    <string name="deadline_today">Termin mija dziś!</string>
+    <string name="deadline_passed">Termin minął: %1$s</string>
+    <string name="recurring_deadline_approaching">Zbliża się termin: %1$s (powtórzenie %2$d)</string>
+    <string name="recurring_deadline_today">Termin mija dzisiaj (%1$d. powtórzeń)!</string>
+    <string name="recurring_deadline_passed">Termin minął: %1$s (%2$d. powtórzenie)</string>
+    <string name="notif_reminder_ch_name">Przypomnienie o zadaniu</string>
+    <string name="notif_reminder_ch_desc">Przypomnienia o nadchodzących zadaniach.</string>
+    <string name="notif_reminder_act_snooze">Uśpij %1$s</string>
+    <string name="notif_reminder_act_snooze_until_deadline">Uśpij do czasu upływu terminu</string>
+    <string name="notif_reminder_act_done">Oznacz jako wykonane</string>
+    <string name="weekdays">Dni powszednie</string>
+    <string name="slide2_text">Możesz zarządzać swoimi zadaniami na opisanych listach zadań do wykonania.</string>
+    <string name="export_succeeded">Eksport zakończony pomyślnie</string>
+    <string name="export_failed">Eksport nie powiódł się</string>
+    <string name="import_succeeded">Import zakończony pomyślnie</string>
+    <string name="import_failed">Import nie powiódł się</string>
+    <string name="import_question_title">Usunąć istniejące dane?</string>
+    <string name="import_question_text">Czy usunąć wszystkie istniejące dane (wszystkie listy zadań do wykonania, zadania i podzadania) przed zaimportowaniem nowych danych?</string>
+    <string name="delete_existing_data">Usuń istniejące dane</string>
+    <string name="keep_existing_data">Zachowaj istniejące dane</string>
+    <string name="alert_list_delete">Naprawdę usunąć tę listę?</string>
+    <string name="alert_done_tasks_remove">Czy na pewno usunąć wszystkie wykonane zadania?</string>
+    <string name="alert_clear">Naprawdę jasne?</string>
+    <string name="filter_colon">Filtr:</string>
+    <string name="grouping_colon">Grupowanie:</string>
+    <string name="sorting_colon">Sortowanie:</string>
+    <string name="various_colon">Różne:</string>
+    <string name="show_days_until_deadline">Pokaż liczbę dni do terminu</string>
+    <string name="permission_todo_description">Umożliwia aplikacji Lista zadań uruchomienie timera przy określonym zadaniu z listy zadań</string>
+    <string name="nth_recurrence_at">%1$d. powtarzanie w %2$s</string>
+</resources>

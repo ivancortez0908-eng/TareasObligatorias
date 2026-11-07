@@ -1,0 +1,124 @@
+/*
+Privacy Friendly To-Do List
+Copyright (C) 2024-2025  Christian Adams
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+package org.secuso.privacyfriendlytodolist.model.database.dao
+
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Update
+import org.secuso.privacyfriendlytodolist.model.database.entities.TodoTaskData
+import org.secuso.privacyfriendlytodolist.util.Timestamp
+
+@Dao
+interface TodoTaskDao {
+    @Insert
+    suspend fun insert(todoTaskData: TodoTaskData): Long
+
+    @Update
+    suspend fun update(todoTaskData: TodoTaskData): Int
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertOrUpdate(todoTaskData: TodoTaskData)
+
+    @Delete
+    suspend fun delete(todoTaskData: TodoTaskData): Int
+
+    @Query("DELETE FROM todoTasks")
+    suspend fun deleteAll(): Int
+
+    @Query("SELECT COUNT(id) FROM todoTasks WHERE isInRecycleBin = 0")
+    suspend fun getCountNotInRecycleBin(): Int
+
+    @Query("SELECT * FROM todoTasks WHERE id = :todoTaskId LIMIT 1")
+    suspend fun getById(todoTaskId: Int): TodoTaskData?
+
+    @Query("SELECT * FROM todoTasks WHERE isInRecycleBin = 0 AND listId = :todoListId ORDER BY sortOrder ASC")
+    suspend fun getByListIdNotInRecycleBin(todoListId: Int): Array<TodoTaskData>
+
+    @Query("SELECT * FROM todoTasks" +
+            " WHERE isInRecycleBin = 0 AND doneTime IS NULL AND reminderTime IS NOT NULL AND reminderTime > :now" +
+            " ORDER BY reminderTime ASC LIMIT 1")
+    suspend fun getNextTaskToRemind(now: Timestamp): TodoTaskData?
+
+    /**
+     * The reminder of a recurring task is obsolete if the reminder time is in the past and
+     * the reminder has been displayed or the task is done.
+     *
+     * Note: [getTasksWithOverdueReminders] returns those tasks, where the reminder time is
+     * in the past and the reminder has NOT been displayed and the task is NOT done.
+     */
+    @Query("SELECT * FROM todoTasks" +
+            " WHERE isInRecycleBin = 0 AND recurrencePattern <> 0 AND reminderTime IS NOT NULL" +
+            " AND reminderTime <= :now AND (reminderState = 1 OR doneTime IS NOT NULL)")
+    suspend fun getRecurringTasksWithObsoleteReminders(now: Timestamp): Array<TodoTaskData>
+
+    /**
+     * The reminder of a recurring task is outdated if the reminder time is in the past.
+     */
+    @Query("SELECT * FROM todoTasks" +
+            " WHERE isInRecycleBin = 0 AND recurrencePattern <> 0 AND reminderTime IS NOT NULL" +
+            " AND reminderTime <= :now")
+    suspend fun getRecurringTasksWithOutdatedReminders(now: Timestamp): Array<TodoTaskData>
+
+    @Query("SELECT * FROM todoTasks" +
+            " WHERE isInRecycleBin = 0 AND recurrencePattern <> 0 AND doneTime IS NOT NULL")
+    suspend fun getDoneRecurringTasks(): Array<TodoTaskData>
+
+    @Query("SELECT * FROM todoTasks" +
+            " WHERE isInRecycleBin = 0 AND doneTime IS NULL AND reminderTime IS NOT NULL" +
+            " AND reminderTime <= :now AND reminderState = 0")
+    suspend fun getTasksWithOverdueReminders(now: Timestamp): Array<TodoTaskData>
+
+    @Query("SELECT * FROM todoTasks WHERE isInRecycleBin = 0 AND doneTime IS NOT NULL")
+    suspend fun getAllDoneNotInRecycleBin(): Array<TodoTaskData>
+
+    @Query("SELECT todoTasks.* FROM todoTasks" +
+            " LEFT JOIN todoLists" +
+            " ON todoTasks.listId = todoLists.id" +
+            " WHERE isInRecycleBin = 0" +
+            " ORDER BY todoLists.sortOrder ASC, todoTasks.sortOrder ASC")
+    suspend fun getAllNotInRecycleBin(): Array<TodoTaskData>
+
+    @Query("SELECT todoTasks.* FROM todoTasks" +
+            " LEFT JOIN todoLists" +
+            " ON todoTasks.listId = todoLists.id" +
+            " WHERE isInRecycleBin = 0 AND listId IS NULL" +
+            " ORDER BY todoLists.sortOrder ASC, todoTasks.sortOrder ASC")
+    suspend fun getAllNotInListNotInRecycleBin(): Array<TodoTaskData>
+
+    @Query("SELECT todoTasks.* FROM todoTasks" +
+            " LEFT JOIN todoLists" +
+            " ON todoTasks.listId = todoLists.id" +
+            " WHERE isInRecycleBin <> 0" +
+            " ORDER BY todoLists.sortOrder ASC, todoTasks.sortOrder ASC")
+    suspend fun getAllInRecycleBin(): Array<TodoTaskData>
+
+    @Query("SELECT * FROM todoTasks WHERE isInRecycleBin = 0 AND listId = :listId ORDER BY sortOrder ASC")
+    suspend fun getAllOfListNotInRecycleBin(listId: Int): Array<TodoTaskData>
+
+    @Query("UPDATE todoTasks SET sortOrder = :sortOrder WHERE id = :id")
+    suspend fun updateSortOrder(id: Int, sortOrder: Int): Int
+
+    @Query("UPDATE todoTasks SET sortOrder = COALESCE((SELECT MAX(sortOrder) + 1 FROM todoTasks WHERE listId = :listId OR (listId IS NULL AND :listId IS NULL)), 0) WHERE id = :id")
+    suspend fun updateSortOrderToLast(id: Int, listId: Int?): Int
+
+    @Query("UPDATE todoTasks SET name = :name, progress = :progress, doneTime = :doneTime WHERE id = :id")
+    suspend fun updateValuesFromPomodoro(id: Int, name: String, progress: Int, doneTime: Timestamp?): Int
+}

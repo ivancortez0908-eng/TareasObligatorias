@@ -1,0 +1,806 @@
+/*
+Privacy Friendly To-Do List
+Copyright (C) 2018-2026  Sebastian Lutz
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+package org.secuso.privacyfriendlytodolist.view
+
+import android.content.Context
+import android.content.SharedPreferences
+import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.BaseExpandableListAdapter
+import android.widget.CheckBox
+import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.ProgressBar
+import android.widget.TextView
+import android.widget.Toast
+import androidx.core.content.ContextCompat
+import androidx.preference.PreferenceManager
+import com.google.android.material.snackbar.Snackbar
+import org.secuso.privacyfriendlytodolist.R
+import org.secuso.privacyfriendlytodolist.model.ModelServices
+import org.secuso.privacyfriendlytodolist.model.TodoSubtask
+import org.secuso.privacyfriendlytodolist.model.TodoTask
+import org.secuso.privacyfriendlytodolist.util.Helper
+import org.secuso.privacyfriendlytodolist.util.LogTag
+import org.secuso.privacyfriendlytodolist.util.PreferenceMgr
+import org.secuso.privacyfriendlytodolist.util.TaskFilter
+import org.secuso.privacyfriendlytodolist.util.TaskFilterSorter
+import org.secuso.privacyfriendlytodolist.util.Timestamp
+import org.secuso.privacyfriendlytodolist.view.dialog.ProcessTodoSubtaskDialog
+
+/**
+ * Created by Sebastian Lutz on 06.03.2018
+ *
+ * This class manages the To-Do task expandable list items.
+ *
+ * @param todoTasks Data from database in original order
+ * @param showListNames Normally the toolbar title contains the list name. However, if all tasks are
+ * displayed in a dummy list it is not obvious to what list a tasks belongs. This missing
+ * information is then added to each task in an additional text view.
+ * @param givenDeadline If the list contains recurring tasks and all those recurring tasks have the same deadline and
+ * this deadline is different from the next recurring deadline, it can be specified here.
+ * It is used to determine the right urgency.
+ */
+@Suppress("UNUSED_ANONYMOUS_PARAMETER")
+class ExpandableTodoTaskAdapter(private val context: Context, private val model: ModelServices,
+    private val todoTasks: MutableList<TodoTask>, private val showListNames: Boolean,
+    private val givenDeadline: Timestamp? = null) : BaseExpandableListAdapter() {
+    private val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+
+    fun interface OnDataInitiallyLoadedListener {
+        fun onDataInitiallyLoaded(groupCount: Int)
+    }
+
+    fun interface OnTaskMenuClickListener {
+        fun onTaskMenuClicked(todoTask: TodoTask)
+    }
+
+    fun interface OnSubtaskMenuClickListener {
+        fun onSubtaskMenuClicked(todoTask: TodoTask, todoSubtask: TodoSubtask)
+    }
+
+    fun interface OnTasksSwappedListener {
+        fun onTasksSwapped(groupPositionA: Int, groupPositionB: Int)
+    }
+
+    private var onDataInitiallyLoadedListener: OnDataInitiallyLoadedListener? = null
+    private var onTaskMenuClickListener: OnTaskMenuClickListener? = null
+    private var onSubtaskMenuClickListener: OnSubtaskMenuClickListener? = null
+    private var onTasksSwappedListener: OnTasksSwappedListener? = null
+
+
+    private enum class GroupType {
+        TASK_ROW,
+        PRIORITY_ROW
+    }
+
+    private enum class ChildType {
+        SUBTASK_ROW,
+        SETTING_ROW
+    }
+
+    val taskFilterSorter = TaskFilterSorter(context)
+    /** List of to-do tasks after filtering and sorting. */
+    private val filteredTasks: MutableList<TaskHolder> = ArrayList()
+    private val priorityRowPositions = mutableMapOf<TodoTask.Priority, Int>()
+    private var listNames = mapOf<Int, String>()
+    private var dataInitiallyLoaded = false
+
+    init {
+        notifyDataSetChanged()
+    }
+
+    fun setOnDataInitiallyLoadedListener(onDataInitiallyLoadedListener: OnDataInitiallyLoadedListener?) {
+        this.onDataInitiallyLoadedListener = onDataInitiallyLoadedListener
+    }
+
+    fun setOnTaskMenuClickListener(onTaskMenuClickListener: OnTaskMenuClickListener?) {
+        this.onTaskMenuClickListener = onTaskMenuClickListener
+    }
+
+    fun setOnSubtaskMenuClickListener(onSubtaskMenuClickListener: OnSubtaskMenuClickListener?) {
+        this.onSubtaskMenuClickListener = onSubtaskMenuClickListener
+    }
+
+    fun onClickSubtask(groupPosition: Int, childPosition: Int) {
+        val taskHolder = getTaskHolderByPosition(groupPosition)
+        var subtaskMetaData: SubtaskMetaData? = null
+        if (null != taskHolder) {
+            subtaskMetaData = taskHolder.getSubtaskMetaData(childPosition)
+            if (null != subtaskMetaData) {
+                subtaskMetaData.toggleMoveButtonsVisibility()
+                notifyDataSetChanged()
+            }
+        }
+        if (null == subtaskMetaData) {
+            Log.w(TAG, "Unable to get subtask by position $groupPosition, $childPosition.")
+        }
+    }
+
+    fun setOnTasksSwappedListener(onTasksSwappedListener: OnTasksSwappedListener?) {
+        this.onTasksSwappedListener = onTasksSwappedListener
+    }
+
+    private fun filterAndSortTasks() {
+        val newFilteredTasks: MutableList<TaskHolder> = ArrayList()
+        val fiSoTasks = taskFilterSorter.filterAndSortTasks(todoTasks)
+        for (task in fiSoTasks) {
+            // Try to reuse task-holder to keep meta data while sorting
+            var taskHolder = filteredTasks.find { other ->
+                return@find other.todoTask == task
+            }
+            if (null == taskHolder) {
+                taskHolder = TaskHolder(task)
+            }
+            newFilteredTasks.add(taskHolder)
+        }
+        filteredTasks.clear()
+        filteredTasks.addAll(newFilteredTasks)
+
+        if (taskFilterSorter.isGroupingByPriority) {
+            countTasksPerPriority()
+        }
+    }
+
+    /**
+     * Count how many tasks belong to each priority group (tasks are now sorted by priority).
+     *
+     * If [ExpandableTodoTaskAdapter.taskFilterSorter] sorted by the priority, this method
+     * must be called. It computes the position of the dividing rows between the priority ranges.
+     * These positions are necessary to distinguish of what group type the current row is.
+     */
+    private fun countTasksPerPriority() {
+        priorityRowPositions.clear()
+        if (filteredTasks.isNotEmpty()) {
+            var pos = 0
+            var currentPriority: TodoTask.Priority
+            val priorityAlreadySeen = HashSet<TodoTask.Priority>()
+            for (taskHolder in filteredTasks) {
+                currentPriority = taskHolder.todoTask.getPriority()
+                if (!priorityAlreadySeen.contains(currentPriority)) {
+                    priorityAlreadySeen.add(currentPriority)
+                    priorityRowPositions[currentPriority] = pos
+                    ++pos // skip the current priority-line
+                }
+                ++pos
+            }
+        }
+    }
+
+    /**
+     * @param groupPosition position of current row. For that reason the offset to the task must be
+     * computed taking into account all preceding dividing priority rows
+     * @return null if there is no task at @param groupPosition (but a divider row) or the wanted task
+     */
+    private fun getTaskHolderByPosition(groupPosition: Int): TaskHolder? {
+        var seenPriorityRows = 0
+        if (taskFilterSorter.isGroupingByPriority) {
+            for (priority in TodoTask.Priority.entries) {
+                val priorityPos = priorityRowPositions[priority]
+                if (null != priorityPos) {
+                    if (groupPosition < priorityPos) {
+                        break
+                    }
+                    ++seenPriorityRows
+                }
+            }
+        }
+        val taskIndex = groupPosition - seenPriorityRows
+        if (taskIndex >= 0 && taskIndex < filteredTasks.size) {
+            return filteredTasks[taskIndex]
+        }
+        Log.w(TAG, "Unable to get task by group position $groupPosition")
+        return null // should never be the case
+    }
+
+    /**
+     * @param groupPosition position of current row. For that reason the offset to the task must be
+     * computed taking into account all preceding dividing priority rows
+     * @return null if there is no task at @param groupPosition (but a divider row) or the wanted task
+     */
+    fun getTaskByPosition(groupPosition: Int): TodoTask? {
+        return getTaskHolderByPosition(groupPosition)?.todoTask
+    }
+
+    private fun getPositionByTask(taskIndex: Int): Int {
+        var groupPosition = taskIndex
+        if (taskFilterSorter.isGroupingByPriority) {
+            val sortedPriorityRowPositions = priorityRowPositions.values.sorted()
+            for (priorityRowPosition in sortedPriorityRowPositions) {
+                if (priorityRowPosition <= groupPosition) {
+                    ++groupPosition
+                }
+            }
+        }
+        return groupPosition
+    }
+
+    override fun getGroupCount(): Int {
+        return if (taskFilterSorter.isGroupingByPriority) filteredTasks.size + priorityRowPositions.size else filteredTasks.size
+    }
+
+    override fun getChildrenCount(groupPosition: Int): Int {
+        var count = ChildType.entries.size - 1
+        val todoTask = getTaskHolderByPosition(groupPosition)?.todoTask
+        if (null != todoTask) {
+            count += todoTask.getSubtasks().size
+        }
+        return count
+    }
+
+    override fun getGroupTypeCount(): Int {
+        return GroupType.entries.size
+    }
+
+    /**
+     * @param groupPosition Position of group in range 0 - number of groups minus one.
+     */
+    private fun getGroupTypeEnum(groupPosition: Int): GroupType {
+        return if (taskFilterSorter.isGroupingByPriority && priorityRowPositions.values.contains(groupPosition)) {
+            GroupType.PRIORITY_ROW
+        } else {
+            GroupType.TASK_ROW
+        }
+    }
+
+    override fun getGroupType(groupPosition: Int): Int {
+        return getGroupTypeEnum(groupPosition).ordinal
+    }
+
+    override fun getChildTypeCount(): Int {
+        return ChildType.entries.size
+    }
+
+    /**
+     * @param groupPosition Position of group in range 0 - number of groups minus one.
+     * @param childPosition Position of child in range 0 - number of children minus one.
+     */
+    private fun getChildTypeEnum(groupPosition: Int, childPosition: Int): ChildType {
+        val todoTask = getTaskHolderByPosition(groupPosition)?.todoTask
+        return if (null != todoTask && childPosition < todoTask.getSubtasks().size) {
+            ChildType.SUBTASK_ROW
+        } else {
+            ChildType.SETTING_ROW
+        }
+    }
+
+    override fun getChildType(groupPosition: Int, childPosition: Int): Int {
+        return getChildTypeEnum(groupPosition, childPosition).ordinal
+    }
+
+    override fun isChildSelectable(groupPosition: Int, childPosition: Int): Boolean {
+        return getChildTypeEnum(groupPosition, childPosition) == ChildType.SUBTASK_ROW
+    }
+
+    override fun hasStableIds(): Boolean {
+        return false
+    }
+
+    override fun getGroupId(groupPosition: Int): Long {
+        return groupPosition.toLong()
+    }
+
+    override fun getGroup(groupPosition: Int): Any {
+        return filteredTasks[groupPosition]
+    }
+
+    override fun getChildId(groupPosition: Int, childPosition: Int): Long {
+        return childPosition.toLong()
+    }
+
+    override fun getChild(groupPosition: Int, childPosition: Int): Any {
+        return childPosition
+    }
+
+    private fun getPriorityNameByRowPos(groupPosition: Int): String {
+        var priority: TodoTask.Priority? = null
+        for ((key, value) in priorityRowPositions) {
+            if (value == groupPosition) {
+                priority = key
+                break
+            }
+        }
+        return Helper.priorityToString(context, priority)
+    }
+
+    override fun notifyDataSetChanged() {
+        if (showListNames) {
+            model.getAllToDoListNames { todoListNames ->
+                listNames = todoListNames
+                finishDataSetChangedNotification()
+            }
+        } else {
+            finishDataSetChangedNotification()
+        }
+    }
+
+    private fun finishDataSetChangedNotification() {
+        filterAndSortTasks()
+        super.notifyDataSetChanged()
+        if (!dataInitiallyLoaded) {
+            dataInitiallyLoaded = true
+            onDataInitiallyLoadedListener?.onDataInitiallyLoaded(groupCount)
+        }
+    }
+
+    override fun getGroupView(groupPosition: Int, isExpanded: Boolean, convertView: View?, parent: ViewGroup): View? {
+        var actualConvertView = convertView
+        val groupType = getGroupTypeEnum(groupPosition)
+        when (groupType) {
+            GroupType.TASK_ROW -> {
+                val currentTaskHolder = getTaskHolderByPosition(groupPosition) ?: return actualConvertView
+                val currentTask = currentTaskHolder.todoTask
+                val tvh: GroupTaskViewHolder
+                if (actualConvertView?.tag is GroupTaskViewHolder) {
+                    tvh = actualConvertView.tag as GroupTaskViewHolder
+                } else {
+                    actualConvertView = LayoutInflater.from(context)
+                        .inflate(R.layout.exlv_task_main_row, parent, false)
+                    tvh = GroupTaskViewHolder(
+                        actualConvertView.findViewById(R.id.tv_exlv_task_name),
+                        actualConvertView.findViewById(R.id.bt_task_move_up),
+                        actualConvertView.findViewById(R.id.bt_task_move_down),
+                        actualConvertView.findViewById(R.id.bt_task_menu),
+                        actualConvertView.findViewById(R.id.iv_exlv_task_deadline),
+                        actualConvertView.findViewById(R.id.tv_exlv_task_deadline),
+                        actualConvertView.findViewById(R.id.iv_exlv_task_recurring_deadline),
+                        actualConvertView.findViewById(R.id.tv_exlv_task_recurring_deadline),
+                        actualConvertView.findViewById(R.id.iv_exlv_task_reminder),
+                        actualConvertView.findViewById(R.id.tv_exlv_task_reminder),
+                        actualConvertView.findViewById(R.id.tv_exlv_task_list_name),
+                        actualConvertView.findViewById(R.id.cb_task_done),
+                        actualConvertView.findViewById(R.id.v_task_urgency_color_bar),
+                        actualConvertView.findViewById(R.id.pb_task_progress),
+                        actualConvertView.findViewById(R.id.tv_exlv_task_description)
+                    )
+                    tvh.done.tag = currentTask.getId()
+                    tvh.done.isChecked = currentTask.isDone()
+                    tvh.done.jumpDrawablesToCurrentState()
+                    actualConvertView.tag = tvh
+                }
+                tvh.name.text = currentTask.getName()
+                tvh.moveUpButton.visibility = if (isExpanded) View.VISIBLE else View.GONE
+                tvh.moveDownButton.visibility = tvh.moveUpButton.visibility
+                tvh.moveUpButton.setOnClickListener {
+                    moveTask(currentTaskHolder, groupPosition, true)
+                }
+                tvh.moveDownButton.setOnClickListener {
+                    moveTask(currentTaskHolder, groupPosition, false)
+                }
+                tvh.taskMenuButton.setOnClickListener {
+                    onTaskMenuClickListener?.onTaskMenuClicked(currentTask)
+                }
+
+                val doneStatusChanged = currentTask.updateDoneStatus()
+                val progressChanged = if (hasAutoProgress()) currentTask.computeProgress() else false
+                if (doneStatusChanged || progressChanged) {
+                    currentTask.setChanged()
+                    model.saveTodoTaskInDb(currentTask)
+                }
+                tvh.progressBar.progress = currentTask.getProgress()
+
+                tvh.listName.visibility = View.GONE
+                if (showListNames && currentTask.getListId() != null) {
+                    val listName = listNames[currentTask.getListId()]
+                    if (null != listName) {
+                        tvh.listName.text = listName
+                        tvh.listName.visibility = View.VISIBLE
+                    }
+                }
+                val deadline = currentTask.getDeadline()
+                if (deadline != null) {
+                    tvh.deadline.text = deadline.createLocalizedDateString()
+                    tvh.deadlineIcon.visibility = View.VISIBLE
+                    tvh.deadline.visibility = View.VISIBLE
+                } else {
+                    tvh.deadlineIcon.visibility = View.GONE
+                    tvh.deadline.visibility = View.GONE
+                }
+                val reminderTime = currentTask.getReminderTime()
+                if (isExpanded && reminderTime != null) {
+                    tvh.reminder.text = reminderTime.createLocalizedDateTimeString()
+                    tvh.reminderIcon.visibility = View.VISIBLE
+                    tvh.reminder.visibility = View.VISIBLE
+                } else {
+                    tvh.reminderIcon.visibility = View.GONE
+                    tvh.reminder.visibility = View.GONE
+                }
+                if (isExpanded && currentTask.isRecurring() && currentTask.hasDeadline()) {
+                    val now = Timestamp.createCurrent()
+                    val recurringDeadlineAndCount = currentTask.getDeadline()!!.getNextRecurringDate(
+                        currentTask, now, acceptDestDate = true)
+                    val recurringDeadlineString = recurringDeadlineAndCount.first.createLocalizedDateString()
+                    tvh.recurringDeadline.text = context.getString(R.string.nth_recurrence_at,
+                        recurringDeadlineAndCount.second, recurringDeadlineString)
+                    tvh.recurringDeadlineIcon.visibility = View.VISIBLE
+                    tvh.recurringDeadline.visibility = View.VISIBLE
+                } else {
+                    tvh.recurringDeadlineIcon.visibility = View.GONE
+                    tvh.recurringDeadline.visibility = View.GONE
+                }
+                val description = currentTask.getDescription()
+                if (isExpanded && description.isNotEmpty()) {
+                    tvh.taskDescription.visibility = View.VISIBLE
+                    tvh.taskDescription.text = description
+                } else {
+                    tvh.taskDescription.visibility = View.GONE
+                }
+                tvh.urgencyColorBar.setBackgroundColor(getUrgencyColor(currentTask))
+                tvh.done.isChecked = currentTask.isDone()
+                tvh.done.jumpDrawablesToCurrentState()
+                tvh.done.setOnCheckedChangeListener { buttonView, isChecked ->
+                    if (buttonView.isPressed) {
+                        val snackBar = Snackbar.make(buttonView, R.string.snack_check, Snackbar.LENGTH_LONG)
+                        snackBar.setAction(R.string.snack_undo) {
+                            val inverted = !isChecked
+                            buttonView.isChecked = inverted
+                            currentTask.setDone(inverted)
+                            currentTask.setAllSubtasksDone(inverted)
+                            if (hasAutoProgress()) {
+                                currentTask.computeProgress()
+                            }
+                            currentTask.setChanged()
+                            for (subtask: TodoSubtask in currentTask.getSubtasks()) {
+                                subtask.setChanged()
+                            }
+                            model.saveTodoTaskAndSubtasksInDb(currentTask) {
+                                notifyDataSetChanged()
+                            }
+                        }
+                        snackBar.show()
+                        currentTask.setDone(buttonView.isChecked)
+                        currentTask.setAllSubtasksDone(buttonView.isChecked)
+                        if (hasAutoProgress()) {
+                            currentTask.computeProgress()
+                        }
+                        currentTask.setChanged()
+                        for (subtask: TodoSubtask in currentTask.getSubtasks()) {
+                            subtask.setChanged()
+                        }
+                        model.saveTodoTaskAndSubtasksInDb(currentTask) {
+                            notifyDataSetChanged()
+                        }
+                    }
+                }
+            }
+
+            GroupType.PRIORITY_ROW -> {
+                val pvh: GroupPriorityViewHolder
+                if (actualConvertView?.tag is GroupPriorityViewHolder) {
+                    pvh = actualConvertView.tag as GroupPriorityViewHolder
+                } else {
+                    actualConvertView =
+                        LayoutInflater.from(context).inflate(R.layout.exlv_priority_row, parent, false)
+                    pvh = GroupPriorityViewHolder(
+                        actualConvertView.findViewById(R.id.tv_priority_name)
+                    )
+                    actualConvertView.tag = pvh
+                }
+                pvh.priorityName.text = getPriorityNameByRowPos(groupPosition)
+                actualConvertView!!.isClickable = true
+            }
+        }
+        return actualConvertView
+    }
+
+    override fun getChildView(groupPosition: Int, childPosition: Int, isLastChild: Boolean,
+                              convertView: View?, parent: ViewGroup): View? {
+        var actualConvertView = convertView
+        val childType = getChildTypeEnum(groupPosition, childPosition)
+        val currentTaskHolder = getTaskHolderByPosition(groupPosition) ?: return actualConvertView
+        val currentTask = currentTaskHolder.todoTask
+        when (childType) {
+            ChildType.SUBTASK_ROW -> {
+                val subtaskIndex = childPosition
+                val currentSubtask = currentTask.getSubtasks()[subtaskIndex]
+                val currentSubtaskMetaData = currentTaskHolder.getSubtaskMetaData(subtaskIndex)!!
+                val svh: SubtaskViewHolder
+                if (actualConvertView?.tag is SubtaskViewHolder) {
+                    svh = actualConvertView.tag as SubtaskViewHolder
+                } else {
+                    actualConvertView = LayoutInflater.from(context)
+                        .inflate(R.layout.exlv_subtask_row, parent, false)
+                    svh = SubtaskViewHolder(
+                        actualConvertView.findViewById(R.id.tv_subtask_name),
+                        actualConvertView.findViewById(R.id.cb_subtask_done),
+                        actualConvertView.findViewById(R.id.v_subtask_urgency_color_bar),
+                        actualConvertView.findViewById(R.id.bt_subtask_move_up),
+                        actualConvertView.findViewById(R.id.bt_subtask_move_down),
+                        actualConvertView.findViewById(R.id.bt_subtask_menu)
+                    )
+                    actualConvertView.tag = svh
+                }
+                svh.urgencyColorBar.setBackgroundColor(getUrgencyColor(currentTask))
+                svh.done.isChecked = currentSubtask.isDone()
+                svh.done.jumpDrawablesToCurrentState()
+                svh.done.setOnCheckedChangeListener { buttonView, isChecked ->
+                    if (buttonView.isPressed) {
+                        currentSubtask.setDone(isChecked)
+                        currentSubtask.setChanged()
+                        model.saveTodoSubtaskInDb(currentSubtask) {
+                            val doneStatusChanged = currentTask.updateDoneStatus()
+                            val progressChanged = if (hasAutoProgress()) currentTask.computeProgress() else false
+                            if (doneStatusChanged || progressChanged) {
+                                currentTask.setChanged()
+                                model.saveTodoTaskInDb(currentTask) {
+                                    notifyDataSetChanged()
+                                }
+                            } else {
+                                notifyDataSetChanged()
+                            }
+                        }
+                    }
+                }
+                svh.subtaskName.text = currentSubtask.getName()
+                svh.moveUpButton.visibility = currentSubtaskMetaData.moveButtonsVisibility
+                svh.moveDownButton.visibility = currentSubtaskMetaData.moveButtonsVisibility
+                svh.moveUpButton.setOnClickListener {
+                    moveSubtask(currentTaskHolder, subtaskIndex, true)
+                }
+                svh.moveDownButton.setOnClickListener {
+                    moveSubtask(currentTaskHolder, subtaskIndex, false)
+                }
+                svh.subtaskMenuButton.setOnClickListener {
+                    onSubtaskMenuClickListener?.onSubtaskMenuClicked(currentTask, currentSubtask)
+                }
+            }
+
+            ChildType.SETTING_ROW -> {
+                val sevh: SettingViewHolder
+                if (actualConvertView?.tag is SettingViewHolder) {
+                    sevh = actualConvertView.tag as SettingViewHolder
+                } else {
+                    actualConvertView = LayoutInflater.from(parent.context)
+                        .inflate(R.layout.exlv_setting_row, parent, false)
+                    sevh = SettingViewHolder(
+                        actualConvertView.findViewById(R.id.ll_add_subtask),
+                        actualConvertView.findViewById(R.id.v_setting_urgency_color_bar)
+                    )
+                    actualConvertView.tag = sevh
+                    if (currentTask.isInRecycleBin()) actualConvertView.visibility = View.GONE
+                }
+                sevh.addSubtaskButton.setOnClickListener {
+                    val newSubtaskDialog = ProcessTodoSubtaskDialog(context)
+                    newSubtaskDialog.setDialogCallback { todoSubtask ->
+                        currentTask.getSubtasks().add(todoSubtask)
+                        todoSubtask.setTaskId(currentTask.getId())
+                        model.saveTodoSubtaskInDb(todoSubtask) {
+                            notifyDataSetChanged()
+                        }
+                    }
+                    newSubtaskDialog.show()
+                }
+                sevh.urgencyColorBar.setBackgroundColor(getUrgencyColor(currentTask))
+            }
+        }
+        return actualConvertView
+    }
+
+    private fun getUrgencyColor(todoTask: TodoTask): Int {
+        val urgency = todoTask.getUrgency(
+            Timestamp.createCurrent(),
+            PreferenceMgr.getDefaultReminderTimeSpan(context),
+            givenDeadline)
+        return ContextCompat.getColor(context, urgency.level.colorId)
+    }
+
+    private fun moveTask(taskHolder: TaskHolder, groupPosition: Int, moveUp: Boolean) {
+        if (filteredTasks.size < 2) {
+            return
+        }
+
+        // Can't move task if different lists are shown.
+        var isFirst = true
+        var otherListId: Int? = null
+        for (filteredTaskHolder in filteredTasks) {
+            val currentListId = filteredTaskHolder.todoTask.getListId()
+            if (!isFirst && currentListId != otherListId) {
+                Toast.makeText(context, context.getString(R.string.cant_move_task_if_diff_lists),
+                    Toast.LENGTH_SHORT).show()
+                return
+            }
+            isFirst = false
+            otherListId = currentListId
+        }
+
+        // Can't move task if filtering, grouping or sorting is active.
+        if (   null != taskFilterSorter.queryString
+            || taskFilterSorter.taskFilter != TaskFilter.ALL_TASKS
+            || taskFilterSorter.isGroupingByPriority
+            || taskFilterSorter.isSortingByDeadline
+            || taskFilterSorter.isSortingByNameAsc) {
+            Toast.makeText(context, context.getString(R.string.cant_move_task_if_filter_group_sort),
+                Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val oldIndex = todoTasks.indexOf(taskHolder.todoTask)
+        if (oldIndex < 0) {
+            Log.e(TAG, "Task ${taskHolder.todoTask} not found.")
+            return
+        }
+        val newIndex = oldIndex + if (moveUp) -1 else 1
+        if (newIndex < 0) {
+            // Shift all one up.
+            val lastIndex = todoTasks.size - 1
+            for (index in lastIndex - 1 downTo 0) {
+                swapTasks(lastIndex, index)
+            }
+        } else if (newIndex >= todoTasks.size) {
+            // Shift all one down.
+            for (index in 1..<todoTasks.size) {
+                swapTasks(0, index)
+            }
+        } else {
+            swapTasks(oldIndex, newIndex, groupPosition, getPositionByTask(newIndex))
+        }
+        // Save changes
+        model.saveTodoTasksSortOrderInDb(todoTasks) {
+            // Notify view
+            notifyDataSetChanged()
+        }
+    }
+
+    private fun swapTasks(indexA: Int, indexB: Int) {
+        swapTasks(indexA, indexB, getPositionByTask(indexA), getPositionByTask(indexB))
+    }
+
+    private fun swapTasks(indexA: Int, indexB: Int, positionA: Int, positionB: Int) {
+        // Swap tasks in data model
+        val taskA = todoTasks[indexA]
+        todoTasks[indexA] = todoTasks[indexB]
+        todoTasks[indexB] = taskA
+        // Swap tasks on UI
+        onTasksSwappedListener?.onTasksSwapped(positionA, positionB)
+    }
+
+    private fun moveSubtask(taskHolder: TaskHolder, subtaskIndex: Int, moveUp: Boolean) {
+        val subtasks = taskHolder.todoTask.getSubtasks()
+        if (subtasks.size < 2) {
+            return
+        }
+        if (subtaskIndex < 0 || subtaskIndex >= subtasks.size) {
+            Log.e(TAG, "Illegal subtask index $subtaskIndex with ${subtasks.size} subtasks.")
+            return
+        }
+        val newIndex = subtaskIndex + if (moveUp) -1 else 1
+        if (newIndex < 0) {
+            // Shift all one up.
+            val lastIndex = subtasks.size - 1
+            for (index in lastIndex - 1 downTo 0) {
+                swapSubtasks(taskHolder, subtasks, lastIndex, index)
+            }
+        } else if (newIndex >= subtasks.size) {
+            // Shift all one down.
+            for (index in 1..<subtasks.size) {
+                swapSubtasks(taskHolder, subtasks, 0, index)
+            }
+        } else {
+            swapSubtasks(taskHolder, subtasks, subtaskIndex, newIndex)
+        }
+        // Save changes
+        model.saveTodoSubtasksSortOrderInDb(taskHolder.todoTask.getSubtasks()) {
+            // Notify view
+            notifyDataSetChanged()
+        }
+    }
+
+    private fun swapSubtasks(taskHolder: TaskHolder, subtasks: MutableList<TodoSubtask>,
+                             indexA: Int, indexB: Int) {
+        // Swap subtasks in dataset
+        val subtaskA = subtasks[indexA]
+        subtasks[indexA] = subtasks[indexB]
+        subtasks[indexB] = subtaskA
+        // Swap meta data of subtasks
+        val metaDataA = taskHolder.getSubtaskMetaData(indexA)!!
+        val metaDataB = taskHolder.getSubtaskMetaData(indexB)!!
+        taskHolder.setSubtaskMetaData(indexA, metaDataB)
+        taskHolder.setSubtaskMetaData(indexB, metaDataA)
+    }
+
+    private fun hasAutoProgress(): Boolean {
+        //automatic-progress enabled?
+        return prefs.getBoolean(PreferenceMgr.P_IS_AUTO_PROGRESS.name, false)
+    }
+
+    private class GroupPriorityViewHolder(
+        val priorityName: TextView
+    )
+
+    private class GroupTaskViewHolder(
+        val name: TextView,
+        val moveUpButton: ImageButton,
+        val moveDownButton: ImageButton,
+        val taskMenuButton: ImageButton,
+        val deadlineIcon: ImageView,
+        val deadline: TextView,
+        val recurringDeadlineIcon: ImageView,
+        val recurringDeadline: TextView,
+        val reminderIcon: ImageView,
+        val reminder: TextView,
+        val listName: TextView,
+        val done: CheckBox,
+        val urgencyColorBar: View,
+        val progressBar: ProgressBar,
+        val taskDescription: TextView
+    )
+
+    private class SubtaskViewHolder(
+        val subtaskName: TextView,
+        val done: CheckBox,
+        val urgencyColorBar: View,
+        val moveUpButton: ImageButton,
+        val moveDownButton: ImageButton,
+        val subtaskMenuButton: ImageButton
+    )
+
+    private class SettingViewHolder(
+        val addSubtaskButton: LinearLayout,
+        val urgencyColorBar: View
+    )
+
+    private class TaskHolder(val todoTask: TodoTask) {
+        private val subtasksMetaData = MutableList(todoTask.getSubtasks().size) { _ ->
+            return@MutableList SubtaskMetaData()
+        }
+
+        private fun adaptMetaDataListSize(expectedSize: Int) {
+            while (expectedSize > subtasksMetaData.size) {
+                subtasksMetaData.add(SubtaskMetaData())
+            }
+            while (expectedSize < subtasksMetaData.size) {
+                subtasksMetaData.removeAt(subtasksMetaData.size - 1)
+            }
+        }
+
+        fun setSubtaskMetaData(subtaskIndex: Int, value: SubtaskMetaData) {
+            val subtasksCount = todoTask.getSubtasks().size
+            if (subtaskIndex in 0..<subtasksCount) {
+                adaptMetaDataListSize(subtasksCount)
+                subtasksMetaData[subtaskIndex] = value
+            } else {
+                Log.e(TAG, "Invalid subtask index: $subtaskIndex. Subtasks count: $subtasksCount.")
+            }
+        }
+
+        fun getSubtaskMetaData(subtaskIndex: Int): SubtaskMetaData? {
+            var result: SubtaskMetaData? = null
+            val subtasksCount = todoTask.getSubtasks().size
+            if (subtaskIndex in 0..<subtasksCount) {
+                adaptMetaDataListSize(subtasksCount)
+                result = subtasksMetaData[subtaskIndex]
+            } else {
+                Log.e(TAG, "Invalid subtask index: $subtaskIndex. Subtasks count: $subtasksCount.")
+            }
+            return result
+        }
+    }
+
+    private class SubtaskMetaData(var moveButtonsVisibility: Int = View.GONE) {
+        fun toggleMoveButtonsVisibility() {
+            moveButtonsVisibility = if (moveButtonsVisibility == View.GONE) View.VISIBLE else View.GONE
+        }
+    }
+
+    companion object {
+        private val TAG = LogTag.create(this::class.java.declaringClass)
+    }
+}
